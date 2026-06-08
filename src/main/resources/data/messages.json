@@ -8,7 +8,6 @@
         "contentType": "TEXT",
         "contents": "Hello there!",
         "attachment_url": "",
-        "tag": "greeting",
         "isRead": false,
         "edited": false
         },
@@ -20,7 +19,6 @@
         "contentType": "TEXT",
         "contents": "How do I fix the JdbcSQLSyntaxErrorException?",
         "attachment_url": "",
-        "tag": "support",
         "isRead": false,
         "edited": true
         }

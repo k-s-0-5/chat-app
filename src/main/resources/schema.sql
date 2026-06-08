@@ -1,25 +1,24 @@
 CREATE TABLE IF NOT EXISTS Account (
-    id INT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     username VARCHAR(25) NOT NULL UNIQUE,
     email VARCHAR(254) NOT NULL UNIQUE,
     password VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Conversation (
-    id INT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     title VARCHAR(128) NOT NULL,
     lastSent timestamp NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Message (
-    id INT PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     account_id INT NOT NULL,
     conversation_id INT NOT NULL,
     sent_at timestamp NOT NULL,
     content_type VARCHAR(16) NOT NULL,
     contents varchar(250) NOT NULL,
     attachment_url varchar(100),
-    tag varchar(20),
     is_read BOOLEAN,
     edited BOOLEAN,
 
@@ -28,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Message (
 );
 
 CREATE TABLE IF NOT EXISTS Participant (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT, 
     account_id INT NOT NULL,
     conversation_id INT NOT NULL,
     role VARCHAR(16),

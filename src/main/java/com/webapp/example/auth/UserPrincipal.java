@@ -2,6 +2,7 @@ package com.webapp.example.auth;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -32,7 +33,7 @@ public class UserPrincipal implements UserDetails{
         return account.username();
     }
 
-    public Integer getId() {
+    public UUID getId() {
         return account.id();
     }
 }

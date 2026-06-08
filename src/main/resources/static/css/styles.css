@@ -117,6 +117,11 @@ input::placeholder {
   animation: glow 1.5s infinite alternate;
 }
 
+.area {
+  outline: 2px solid rgba(40,40,40,.1);
+  outline-offset: -1px;
+}
+
 /* https://stackoverflow.com/questions/32208665/fit-width-of-div-tightly-to-multi-line-span */
 .message {
   border-radius: 10px;

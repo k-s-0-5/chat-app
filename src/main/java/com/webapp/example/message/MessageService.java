@@ -17,4 +17,8 @@ public class MessageService {
         return messageRepository.findByConversationId(conversationId);
     }
 
+    public void createMessage(Message message) 
+    {
+        messageRepository.create(message);
+    }
 }

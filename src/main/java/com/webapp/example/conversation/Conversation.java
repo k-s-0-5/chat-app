@@ -1,9 +1,10 @@
 package com.webapp.example.conversation;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record Conversation(
-    Integer id,
+    UUID id,
     String title,
     LocalDateTime lastSent
 ){}

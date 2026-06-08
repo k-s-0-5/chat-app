@@ -21,6 +21,6 @@ public class ParticipantController {
 
     @GetMapping("")
     public List<Participant> findAll(Account account){
-        return participantRepository.findAll(account);
+        return participantRepository.findAllWithAccount(account);
     }
 }

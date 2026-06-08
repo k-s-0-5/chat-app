@@ -23,7 +23,7 @@
 				<div style="display: flex; height: 100%;">
 
 					<!-- Conversations lists -->
-					<div style="flex: 2; background-color: blanchedalmond;">
+					<div class="area" style="flex: 2; background-color: blanchedalmond;">
 						<div th:each="conversation : ${conversations}" style="padding: 7px;">
 							<button class="neon-box" onclick="fetchMessages(this)" th:data-id="${conversation.id}">
 								<div th:text="${conversation.title}"></div>
@@ -33,19 +33,27 @@
 					</div>
 
 					<!-- Messages -->
-					<div id="message-column"style="flex: 4; background-color:beige; display: flex; gap:10px; flex-direction: column; padding: 20px;">
-						<div th:fragment="messageList" th:each="message : ${messages}">
-							<div class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--in' : 'time--out'">
-								<small th:text="${message.sentAt}"></small>
-							</div>
-							<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--in' : 'message--out'">
-								<span th:text="${message.contents}" ></span>
+					<div class="area" style="flex: 4; background-color:beige; display: flex; gap:10px; flex-direction: column; padding: 20px; position: relative;">
+						<div id="message-column">
+							<div th:fragment="messageList" th:each="message : ${messages}" th:data-id="${message.id}">
+								<div class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--in' : 'time--out'">
+									<small th:text="${message.sentAt}"></small>
+								</div>
+								<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--in' : 'message--out'">
+									<span th:text="${message.contents}" ></span>
+								</div>
 							</div>
 						</div>
+
+						<form th:action="@{/send}" method="post" style="width: 80%; background-color: black; align-content: space-between; position: absolute; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; align-self: center; bottom: 20px">
+							<input type="text" name="contents" placeholder="Send a message" style="display: inline-block;">
+							<input type="submit" style="width: 30%;">
+						</form>
+
 					</div>
 
 					<!-- WIP -->
-					<div style="flex: 1; background-color:antiquewhite">
+					<div class="area" style="flex: 1; background-color:antiquewhite">
 						3
 					</div>
 

@@ -1,19 +1,16 @@
 package com.webapp.example.message;
 
 import java.time.LocalDateTime;
-
-import jakarta.annotation.Nullable;
+import java.util.UUID;
 
 public record Message(
-    Integer id, 
-    Integer accountId,
+    long id, 
+    UUID accountId,
     Integer conversationId, 
     LocalDateTime sentAt, 
     Type contentType,
     String contents,
-    @Nullable
     String attachmentUrl, 
-    String tag, 
     boolean isRead, 
     boolean edited
 ) {} 

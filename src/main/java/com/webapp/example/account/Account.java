@@ -1,7 +1,9 @@
 package com.webapp.example.account;
 
+import java.util.UUID;
+
 public record Account(
-        Integer id,
+        UUID id,
         String username,
         String email,
         String password) {
