@@ -2,6 +2,7 @@ package com.webapp.example.conversation;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -39,7 +40,7 @@ public class ConversationRepository {
    * @param id
    * @return Optional of conversation
    */
-  public Optional<Conversation> findById(Integer id) {
+  public Optional<Conversation> findById(UUID id) {
     return jdbcClient
         .sql(
             """
@@ -73,7 +74,7 @@ public class ConversationRepository {
    * @param conversation
    * @param id
    */
-  public void update(Conversation updatedConversation, Integer id) {
+  public void update(Conversation updatedConversation, UUID id) {
     jdbcClient
         .sql(
             """
@@ -89,7 +90,7 @@ public class ConversationRepository {
    *
    * @param id
    */
-  public void delete(Integer id) {
+  public void delete(UUID id) {
     jdbcClient
         .sql(
             """

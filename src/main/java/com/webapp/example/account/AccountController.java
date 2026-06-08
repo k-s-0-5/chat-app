@@ -1,10 +1,10 @@
 package com.webapp.example.account;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,63 +14,51 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
 
-    private final AccountRepository accountRepository;
-    private final AccountService accountService;
+  private final AccountRepository accountRepository;
+  private final AccountService accountService;
 
-    public AccountController(AccountRepository accountRepository, AccountService accountService) {
-        this.accountRepository = accountRepository;
-        this.accountService = accountService;
+  public AccountController(AccountRepository accountRepository, AccountService accountService) {
+    this.accountRepository = accountRepository;
+    this.accountService = accountService;
+  }
+
+  @GetMapping("")
+  List<Account> findAll() {
+    return accountRepository.findAll();
+  }
+
+  @GetMapping("/{id}")
+  Account findByUsername(@PathVariable String username) {
+    Optional<Account> account = accountRepository.findByUsername(username);
+    if (account.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
+    return account.get();
+  }
 
-    @GetMapping("")
-    List<Account> findAll() {
-        return accountRepository.findAll();
+  @GetMapping("/{username}")
+  Account findById(@PathVariable UUID id) {
+    Optional<Account> account = accountRepository.findById(id);
+    if (account.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
+    return account.get();
+  }
 
-    @GetMapping("/{id}")
-    Account findByUsername(@PathVariable String username) {
-        Optional<Account> account = accountRepository.findByUsername(username);
-        if (account.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        return account.get();
-    }
+  @ResponseStatus(HttpStatus.CREATED)
+  @PostMapping("")
+  void create(@Valid @RequestBody Account account) {
+    accountService.register(account);
+  }
 
-    @GetMapping("/{username}")
-    Account findById(@PathVariable Integer id) {
-        Optional<Account> account = accountRepository.findById(id);
-        if (account.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        return account.get();
-    }
-
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("")
-    void create(@Valid @RequestBody Account account) {
-        accountService.register(account);
-    }
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PutMapping("/{id}")
-    void update(@RequestBody Account account, @PathVariable Integer id) {
-        accountRepository.update(account, id);
-    }
-
-    @GetMapping("/WhoAmI")
-    public void doSomeUserLogic() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated()) {
-            String username = authentication.getName();
-            System.out.println("The logged-in user is: " + username);
-        }
-    }
-
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PutMapping("/{id}")
+  void update(@RequestBody Account account, @PathVariable UUID id) {
+    accountRepository.update(account, id);
+  }
 }

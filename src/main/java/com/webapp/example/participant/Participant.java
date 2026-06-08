@@ -1,8 +1,5 @@
 package com.webapp.example.participant;
 
-public record Participant(
-        Integer id,
-        Integer accountId,
-        Integer conversationId,
-        String role
-) {}
+import java.util.UUID;
+
+public record Participant(Integer id, UUID accountId, UUID conversationId, String role) {}

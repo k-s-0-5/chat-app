@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS Conversation (
 
 CREATE TABLE IF NOT EXISTS Message (
     id BIGINT PRIMARY KEY,
-    account_id INT NOT NULL,
-    conversation_id INT NOT NULL,
+    account_id UUID NOT NULL,
+    conversation_id UUID NOT NULL,
     sent_at timestamp NOT NULL,
     content_type VARCHAR(16) NOT NULL,
     contents varchar(250) NOT NULL,
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS Message (
 
 CREATE TABLE IF NOT EXISTS Participant (
     id INT PRIMARY KEY AUTO_INCREMENT, 
-    account_id INT NOT NULL,
-    conversation_id INT NOT NULL,
+    account_id UUID NOT NULL,
+    conversation_id UUID NOT NULL,
     role VARCHAR(16),
 
     FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE,

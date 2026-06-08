@@ -4,13 +4,12 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record Message(
-    long id, 
+    long id,
     UUID accountId,
-    Integer conversationId, 
-    LocalDateTime sentAt, 
+    UUID conversationId,
+    LocalDateTime sentAt,
     Type contentType,
     String contents,
-    String attachmentUrl, 
-    boolean isRead, 
-    boolean edited
-) {} 
+    String attachmentUrl,
+    boolean isRead,
+    boolean edited) {}

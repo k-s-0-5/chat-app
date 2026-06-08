@@ -19,40 +19,46 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
+  private final UserDetailsService userDetailsService;
 
-    private final JWTFilter jwtFilter;
+  private final JWTFilter jwtFilter;
 
-    SecurityConfig(UserDetailsService userDetailsService, JWTFilter jwtFilter){
-        this.userDetailsService = userDetailsService;
-        this.jwtFilter = jwtFilter;
-    }
+  SecurityConfig(UserDetailsService userDetailsService, JWTFilter jwtFilter) {
+    this.userDetailsService = userDetailsService;
+    this.jwtFilter = jwtFilter;
+  }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        http.csrf(customizer -> customizer.disable());
-        http.authorizeHttpRequests(request -> request
-            .requestMatchers("/login", "/perform-login", "/css/**", "/js/**", "/images/**", "/static/**")
-            .permitAll()
-            .anyRequest().authenticated()).formLogin(form -> form
-            .loginPage("/login"));
-        
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.csrf(customizer -> customizer.disable());
+    http.authorizeHttpRequests(
+            request ->
+                request
+                    .requestMatchers(
+                        "/login", "/perform-login", "/css/**", "/js/**", "/images/**", "/static/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .formLogin(form -> form.loginPage("/login"));
+
+    http.sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        // .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        
-        return http.build();
-    }
+    // .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(new BCryptPasswordEncoder(10));
-        return provider;
-    }
+    return http.build();
+  }
 
-    @Bean 
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+  @Bean
+  public AuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+    provider.setPasswordEncoder(new BCryptPasswordEncoder(10));
+    return provider;
+  }
+
+  @Bean
+  public AuthenticationManager authenticationManager(
+      AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    return authenticationConfiguration.getAuthenticationManager();
+  }
 }

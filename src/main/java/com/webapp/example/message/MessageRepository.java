@@ -2,6 +2,8 @@ package com.webapp.example.message;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -50,7 +52,7 @@ public class MessageRepository {
    * @param conversationId
    * @return List of messages that with a conversationId == conversationId
    */
-  public List<Message> findByConversationId(Integer conversationId) {
+  public List<Message> findByConversationId(UUID conversationId) {
     return jdbcClient
         .sql(
             """
@@ -71,13 +73,15 @@ public class MessageRepository {
         .sql(
             """
             INSERT INTO Message(
+            id,
             account_id, conversation_id,
             sent_at, content_type,
             contents, attachment_url,
             is_read, edited)
-            values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            values(?, ?, ?, ?, ?, ?, ?, ?, ?)
             """)
         .params(
+            message.id(),
             message.accountId(),
             message.conversationId(),
             message.sentAt(),

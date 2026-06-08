@@ -2,14 +2,14 @@
   "participants": [
     {
       "id": 1,
-      "accountId": 999,
-      "conversationId": 42,
+      "accountId": "2c7bbd80-dbe2-4011-8740-7fed281bfb30",
+      "conversationId": "2827677c-6c3a-4a10-91fe-fb50373c2c97",
       "role": "ADMIN"
     },
     {
       "id": 2,
-      "accountId": 1000,
-      "conversationId": 42,
+      "accountId": "c0d85142-40da-4ea1-968f-d746c648fac4",
+      "conversationId": "2827677c-6c3a-4a10-91fe-fb50373c2c97",
       "role": "USER"
     }
   ]

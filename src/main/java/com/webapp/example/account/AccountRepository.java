@@ -2,6 +2,7 @@ package com.webapp.example.account;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -39,7 +40,7 @@ public class AccountRepository {
    * @param id
    * @return Optional of account
    */
-  public Optional<Account> findById(Integer id) {
+  public Optional<Account> findById(UUID id) {
     return jdbcClient
         .sql(
             """
@@ -93,7 +94,7 @@ public class AccountRepository {
    * @param updatedAccount
    * @param id
    */
-  public void update(Account updatedAccount, Integer id) {
+  public void update(Account updatedAccount, UUID id) {
     jdbcClient
         .sql(
             """
@@ -111,7 +112,7 @@ public class AccountRepository {
    *
    * @param id
    */
-  public void delete(Integer id) {
+  public void delete(UUID id) {
     jdbcClient
         .sql(
             """
