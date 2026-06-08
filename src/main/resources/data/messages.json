@@ -1,0 +1,28 @@
+{
+    "messages": [
+        {
+        "id": 1,
+        "accountId": 999,
+        "conversationId": 42,
+        "sentAt": "2025-01-01T09:00:00",
+        "contentType": "TEXT",
+        "contents": "Hello there!",
+        "attachment_url": "",
+        "tag": "greeting",
+        "isRead": false,
+        "edited": false
+        },
+        {
+        "id": 2,
+        "accountId": 1000,
+        "conversationId": 42,
+        "sentAt": "2025-01-01T10:15:30",
+        "contentType": "TEXT",
+        "contents": "How do I fix the JdbcSQLSyntaxErrorException?",
+        "attachment_url": "",
+        "tag": "support",
+        "isRead": false,
+        "edited": true
+        }
+    ]
+}

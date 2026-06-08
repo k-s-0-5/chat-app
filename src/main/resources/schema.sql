@@ -1,0 +1,39 @@
+CREATE TABLE IF NOT EXISTS Account (
+    id INT PRIMARY KEY,
+    username VARCHAR(25) NOT NULL UNIQUE,
+    email VARCHAR(254) NOT NULL UNIQUE,
+    password VARCHAR(128) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Conversation (
+    id INT PRIMARY KEY,
+    title VARCHAR(128) NOT NULL,
+    lastSent timestamp NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Message (
+    id INT PRIMARY KEY,
+    account_id INT NOT NULL,
+    conversation_id INT NOT NULL,
+    sent_at timestamp NOT NULL,
+    content_type VARCHAR(16) NOT NULL,
+    contents varchar(250) NOT NULL,
+    attachment_url varchar(100),
+    tag varchar(20),
+    is_read BOOLEAN,
+    edited BOOLEAN,
+
+    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE,
+    FOREIGN KEY (conversation_id) REFERENCES Conversation(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Participant (
+    id INT PRIMARY KEY,
+    account_id INT NOT NULL,
+    conversation_id INT NOT NULL,
+    role VARCHAR(16),
+
+    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE,
+    FOREIGN KEY (conversation_id) REFERENCES Conversation(id) ON DELETE CASCADE,
+    UNIQUE (account_id, conversation_id)
+);

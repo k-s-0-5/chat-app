@@ -1,0 +1,187 @@
+/* ============ BASE ============ */
+
+
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  font-family: sans-serif;
+}
+
+header {
+  display: flex;
+  width: 100vw;
+  justify-content: space-around;
+  background-color: aliceblue;
+}
+
+input {
+  color: rgba(250, 250, 250, .8);
+  border: none;
+  padding: 5px;
+  margin: 10px;
+  height: 40px;
+  text-indent: 5px;
+  border-radius: 5px;
+  font-size: 13px;
+  box-sizing: border-box;
+  min-width: 0px;
+  width: 75%;
+  background-color: rgba(180, 200, 225, 0.1);
+}
+
+input[type="submit"] {
+  font-size: 15px;
+  text-indent: 0px;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 15px;
+}
+
+button {
+  border: 0;
+  width: 100%;
+  white-space: nowrap;     
+  overflow: hidden;        
+  text-overflow: clip; 
+  padding: 5px;
+  border-radius: 10px;
+  background-color: rgba(40,40,40,.1);
+}
+
+ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+li {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+
+/* ============ COMPONENTS ============ */
+
+.card {
+  border-radius: 15px;
+  overflow: hidden;
+  justify-self: center;
+  justify-content: space-between;
+}
+
+.card--vertical {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  align-self: center;
+}
+
+.card--horizontal {
+  height: 400px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+input::placeholder {
+  color: rgb(127, 127, 127);
+}
+
+.impact-text {
+  font-size: 45px;
+  font-weight: 500;
+}
+
+.selected-box, .neon-box:hover {
+  box-shadow:
+    0 0 3px white,
+    0 0 15px #ff005e;
+  animation: box-glow 1.5s infinite alternate;
+}
+
+.neon-text {
+  font-size: 4rem;
+  font-weight: 500;
+  color: #fff;
+  text-shadow:
+    0 0 10px #ff005e,
+    0 0 20px #ff005e,
+    0 0 30px #ff005e,
+    0 0 50px #ff005e,
+    0 0 70px #ff005e;
+  animation: glow 1.5s infinite alternate;
+}
+
+/* https://stackoverflow.com/questions/32208665/fit-width-of-div-tightly-to-multi-line-span */
+.message {
+  border-radius: 10px;
+  font-weight: 500;
+  max-width: 80%;
+  padding: 7px; 
+  word-break:break-all;
+  width: fit-content;
+}
+
+.message--in {
+  background-color: #eeeeee;
+  color:rgb(40, 40, 40);
+}
+
+.message--out {
+  background-color: #107ee6;
+  color: white;
+  justify-self: end;
+}
+
+.time {
+  text-wrap: nowrap; 
+}
+
+.time--in {
+  justify-self: start;
+}
+
+.time--out {
+  justify-self: end;
+}
+
+
+/* ============ UTILITIES ============ */
+
+
+.color {
+  background: radial-gradient(circle, rgb(0, 5, 20) 0%, rgba(0, 0, 0, 1) 100%);
+}
+
+
+/* ============ ANIMATIONS ============ */
+
+
+@keyframes glow {
+  0% {
+    text-shadow:
+      0 0 10px #ff005e,
+      0 0 20px #ff005e,
+      0 0 50px #ff005e;
+  }
+  100% {
+    text-shadow:
+      0 0 10px #00d435,
+      0 0 20px #00d435,
+      0 0 50px #00d435;
+  }
+}
+
+@keyframes box-glow {
+  0% {
+    box-shadow: 0 0 15px #ff005e;
+  }
+  100% {
+    box-shadow: 0 0 15px #00d435;
+  }
+}

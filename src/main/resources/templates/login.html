@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+	<head>
+		<title>Login</title>
+		<link rel="stylesheet" th:href="@{/css/styles.css}">
+	</head>
+	<body class="color">
+		<!-- <h1>Please Log In</h1>
+		<div th:if="${param.error}">
+			Invalid username and password.</div>
+		<div th:if="${param.logout}">
+			You have been logged out.</div> -->
+		<div style="height:100%; justify-content: center; align-content: center;">
+			<div class="card card--horizontal" style="max-width: 500px; width: 70vw; outline: 1px solid rgb(35, 41, 49);"> 
+				<div class="card--vertical neon-text" style="justify-content: center; width: 50%;">
+					<div>よ</div>
+					<div>う</div>
+					<div>こ</div>
+					<div>そ</div>
+				</div>
+				<form th:action="@{/perform-login}" method="post" class="card--vertical" style="width: 50%; background-color: rgba(40,40,40,.1);">
+						<input type="text" name="username" placeholder="Username"/>
+						<input type="password" name="password" placeholder="Password"/>
+						<input class="neon-box" type="submit" value="LOG IN"/>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "participants": [
+    {
+      "id": 1,
+      "accountId": 999,
+      "conversationId": 42,
+      "role": "ADMIN"
+    },
+    {
+      "id": 2,
+      "accountId": 1000,
+      "conversationId": 42,
+      "role": "USER"
+    }
+  ]
+}
