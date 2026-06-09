@@ -3,7 +3,6 @@
 	<head>
 		<title>Home</title>
 		<link rel="stylesheet" th:href="@{/css/styles.css}">
-		<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
 	</head>
 	<body>
@@ -150,7 +149,7 @@
 			contents: document.getElementById("message-input").value
 		};
 		
-		if (!message.contents && !conversationId) {
+		if (!message.contents || !conversationId) {
 			return;
 		}
 

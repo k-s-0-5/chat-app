@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS Message (
     account_id UUID NOT NULL,
     conversation_id UUID NOT NULL,
     sent_at timestamp NOT NULL,
-    content_type VARCHAR(16) NOT NULL,
     contents varchar(250) NOT NULL,
     attachment_url varchar(100),
     is_read BOOLEAN,
