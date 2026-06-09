@@ -3,6 +3,8 @@
 	<head>
 		<title>Home</title>
 		<link rel="stylesheet" th:href="@{/css/styles.css}">
+		<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
 	</head>
 	<body>
 		<div class="color" style="width: 100%; height:100%; display: flex; flex-direction: column;">
@@ -25,7 +27,7 @@
 					<!-- Conversations lists -->
 					<div class="area" style="flex: 2; background-color: blanchedalmond;">
 						<div th:each="conversation : ${conversations}" style="padding: 7px;">
-							<button class="neon-box" onclick="fetchMessages(this)" th:data-id="${conversation.id}">
+							<button class="neon-box" onclick="FetchMessages(this)" th:data-id="${conversation.id}">
 								<div th:text="${conversation.title}"></div>
 								<div th:text="${conversation.lastSent}"></div>
 							</button>
@@ -45,8 +47,9 @@
 							</div>
 						</div>
 
-						<form th:action="@{/send}" method="post" style="width: 80%; background-color: black; align-content: space-between; position: absolute; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; align-self: center; bottom: 20px">
-							<input type="text" name="contents" placeholder="Send a message" style="display: inline-block;">
+						<form id="message-form" method="post"
+								style="width: 80%; background-color: black; align-content: space-between; position: absolute; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; align-self: center; bottom: 20px">
+							<input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block;">
 							<input type="submit" style="width: 30%;">
 						</form>
 
@@ -63,15 +66,21 @@
 	</body>
 </html>
 
-<script>
+<script th:inline="javascript">
 	let conversationId = null;
-	function fetchMessages(element) {
+	let selectedElement = null;
+	let subscription = null;
+	let stompClient = null;
+	const currentUserId = /*[[${currentUserId}]]*/ 0;
+
+	function FetchMessages(element) {
 		event.preventDefault();
 
 		if(conversationId != null){
-			element.classList.remove("selected-box");
+			selectedElement.classList.remove("selected-box");
 		}
 
+		selectedElement = element;
 		conversationId = element.getAttribute('data-id');
 		element.classList.add("selected-box");
 
@@ -79,6 +88,77 @@
 			.then(response => response.text())
 			.then(htmlSnippet => {
 				document.getElementById('message-column').innerHTML = htmlSnippet;})
-        	.catch(error => console.error('Error:', error));
+			.catch(error => console.error("Error:", error));
+
+		if(!stompClient){
+			Stomp();
+		}
 	}
+
+	function Stomp (){
+		stompClient = new StompJs.Client({
+			brokerURL: 'ws://localhost:8080/connect',
+			debug: function (str) {
+				console.log(str);
+			},
+			reconnectDelay: 3000,
+			heartbeatIncoming: 3000,
+			heartbeatOutgoing: 3000,
+		});
+
+		stompClient.onConnect = function (frame) {
+			stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
+				
+				const parsedMessage = JSON.parse(message.body)
+
+				const messageContainer = document.getElementById("message-column");
+				const messageElement = document.createElement("div");
+
+				const isMe = (parsedMessage.accountId == currentUserId);
+				const messageClass = isMe ? 'message--in' : 'message--out';
+				const timeClass = isMe ? 'time--in' : 'time--out';
+				
+				messageElement.innerHTML = `
+					<div class="message-time ${timeClass}">
+						<small>${parsedMessage.sentAt}</small>
+					</div>
+					<div class="message ${messageClass}">
+						<span>${parsedMessage.contents}</span>
+					</div>
+				`;
+				
+				messageContainer.appendChild(messageElement);
+				messageContainer.scrollTop = messageContainer.scrollHeight;
+
+			});
+		};
+
+		stompClient.onStompError = function (frame) {
+			console.error('error');
+		};
+
+		stompClient.activate();
+	}
+
+
+	document.getElementById("message-form")
+    .addEventListener("submit", async e => {
+		e.preventDefault();
+
+		const message = {
+			conversationId: conversationId,
+			contents: document.getElementById("message-input").value
+		};
+		
+		if (!message.contents && !conversationId) {
+			return;
+		}
+
+		stompClient.publish({
+			destination: "/ws/messages.send",
+			body: JSON.stringify(message)
+		});
+
+		document.getElementById("message-input").value = "";
+	})
 </script>

@@ -8,8 +8,6 @@ public record Message(
     UUID accountId,
     UUID conversationId,
     LocalDateTime sentAt,
-    Type contentType,
     String contents,
-    String attachmentUrl,
     boolean isRead,
     boolean edited) {}

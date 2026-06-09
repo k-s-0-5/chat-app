@@ -10,7 +10,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -73,11 +72,4 @@ public class ViewController {
       return "redirect:/login";
     }
   }
-
-  // @PostMapping("/send-message")
-  // public void send(@RequestBody Message message, @ModelAttribute Account account,
-  // HttpServletResponse response){
-  //    Message m = new Message();
-  // }
-
 }

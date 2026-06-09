@@ -30,7 +30,7 @@ public class MessageController {
   }
 
   @GetMapping("/{id}")
-  Message findById(@PathVariable Integer id) {
+  Message findById(@PathVariable long id) {
     Optional<Message> message = messageRepository.findById(id);
     if (message.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -46,7 +46,7 @@ public class MessageController {
 
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @PutMapping("/{id}")
-  void update(@RequestBody Message message, @PathVariable Integer id) {
+  void update(@RequestBody Message message, @PathVariable long id) {
     messageRepository.update(message, id);
   }
 }

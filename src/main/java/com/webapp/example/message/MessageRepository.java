@@ -35,7 +35,7 @@ public class MessageRepository {
    * @param id
    * @return Optional of message
    */
-  public Optional<Message> findById(Integer id) {
+  public Optional<Message> findById(long id) {
     return jdbcClient
         .sql(
             """
@@ -73,21 +73,18 @@ public class MessageRepository {
         .sql(
             """
             INSERT INTO Message(
-            id,
-            account_id, conversation_id,
-            sent_at, content_type,
-            contents, attachment_url,
-            is_read, edited)
-            values(?, ?, ?, ?, ?, ?, ?, ?, ?)
+            id, account_id, 
+            conversation_id, sent_at, 
+            contents, is_read, 
+            edited)
+            values(?, ?, ?, ?, ?, ?, ?)
             """)
         .params(
             message.id(),
             message.accountId(),
             message.conversationId(),
             message.sentAt(),
-            message.contentType().toString(),
             message.contents(),
-            message.attachmentUrl(),
             message.isRead(),
             message.edited())
         .update();
@@ -99,25 +96,22 @@ public class MessageRepository {
    * @param message
    * @param id
    */
-  public void update(Message updatedMessage, Integer id) {
+  public void update(Message updatedMessage, long id) {
     jdbcClient
         .sql(
             """
             UPDATE Message set
             account_id = ?, conversation_id = ?,
-            sent_at = ?, content_type = ?,
-            contents = ?, attachment_url = ?,
-            is_read = ?, edited = ?
-            where id = ?)
+            sent_at = ?, contents = ?, 
+            is_read = ?, edited = ? 
+            WHERE id = ?)
             """)
         .params(
             List.of(
                 updatedMessage.accountId(),
                 updatedMessage.conversationId(),
                 updatedMessage.sentAt(),
-                updatedMessage.contentType(),
                 updatedMessage.contents(),
-                updatedMessage.attachmentUrl(),
                 updatedMessage.isRead(),
                 updatedMessage.edited(),
                 id))
@@ -129,7 +123,7 @@ public class MessageRepository {
    *
    * @param id
    */
-  public void delete(Integer id) {
+  public void delete(long id) {
     jdbcClient
         .sql(
             """

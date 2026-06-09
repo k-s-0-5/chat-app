@@ -7,7 +7,6 @@
         "sentAt": "2025-01-01T09:00:00",
         "contentType": "TEXT",
         "contents": "Hello there!",
-        "attachment_url": "",
         "isRead": false,
         "edited": false
         },
@@ -18,7 +17,6 @@
         "sentAt": "2025-01-01T10:15:30",
         "contentType": "TEXT",
         "contents": "How do I fix the JdbcSQLSyntaxErrorException?",
-        "attachment_url": "",
         "isRead": false,
         "edited": true
         }

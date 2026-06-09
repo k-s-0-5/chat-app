@@ -44,7 +44,7 @@ public class AccountRepository {
     return jdbcClient
         .sql(
             """
-            SELECT id, username, email, password FROM Account WHERE id = :id
+            SELECT * FROM Account WHERE id = :id
             """)
         .param("id", id)
         .query(Account.class)

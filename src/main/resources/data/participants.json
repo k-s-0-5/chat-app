@@ -11,6 +11,18 @@
       "accountId": "c0d85142-40da-4ea1-968f-d746c648fac4",
       "conversationId": "2827677c-6c3a-4a10-91fe-fb50373c2c97",
       "role": "USER"
+    },
+    {
+      "id": 3,
+      "accountId": "2c7bbd80-dbe2-4011-8740-7fed281bfb30",
+      "conversationId": "282ab77c-6c3a-4a10-91fe-fb50373c2c97",
+      "role": "ADMIN"
+    },
+    {
+      "id": 4,
+      "accountId": "999cdcb3-27e9-4196-a046-0f5b920b39a4",
+      "conversationId": "282ab77c-6c3a-4a10-91fe-fb50373c2c97",
+      "role": "USER"
     }
   ]
 }
