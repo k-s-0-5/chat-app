@@ -6,7 +6,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
 	</head>
 	<body>
-		<div class="color" style="width: 100%; height:100%; display: flex; flex-direction: column;">
+		<div class="color" style="width: 100%; height:100%; display: flex; flex-direction: column; overflow: hidden;">
 			
 			<header>
 				<div style="width: 100px; min-height: 10vh; flex: 1; background-color: blanchedalmond; text-align: center; align-content: center;">
@@ -34,14 +34,14 @@
 					</div>
 
 					<!-- Messages -->
-					<div class="area" style="flex: 4; background-color:beige; display: flex; gap:10px; flex-direction: column; padding: 20px; position: relative;">
+					<!-- <div class="area" style="flex: 4; background-color:beige; display: flex; gap:10px; flex-direction: column; padding: 20px; position: relative;">
 						<div id="message-column">
-							<div th:fragment="messageList" th:each="message : ${messages}" th:data-id="${message.id}">
-								<div class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--in' : 'time--out'">
+							<div th:fragment="messageList" th:each="message : ${messages}" th:data-id="${message.id}" style="background-color: red;">
+								<div class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
 									<small th:text="${message.sentAt}"></small>
 								</div>
-								<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--in' : 'message--out'">
-									<span th:text="${message.contents}" ></span>
+								<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--out' : 'message--in'">
+									<span th:text="${message.contents}"></span>
 								</div>
 							</div>
 						</div>
@@ -50,6 +50,27 @@
 								style="width: 80%; background-color: black; align-content: space-between; position: absolute; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; align-self: center; bottom: 20px">
 							<input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block;">
 							<input type="submit" style="width: 30%;">
+						</form>
+
+					</div> -->
+
+					<div class="area" style="flex: 4; background-color:beige; display: flex; gap:5px; flex-direction: column; padding: 20px; justify-content: space-between;">
+						<div id="message-column" style="background-color: aquamarine; flex-grow: 1; overflow-y: auto; height: 0px;">
+							<div th:fragment="messageList" th:each="message : ${messages}" th:data-id="${message.id}">
+								<div class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
+									<small th:text="${message.sentAt}"></small>
+								</div>
+								<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--out' : 'message--in'">
+									<span th:text="${message.contents}"></span>
+								</div>
+							</div>
+						</div>
+
+						<!-- ON MAX PAGE SHRINK THIS PUSHES BELOW THE BOTTOM FIX THIS PLEASE -->
+						<form id="message-form" method="post"
+								style="width: 100%; background-color: black; align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center;">
+							<input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block; min-height: 0px;">
+							<input type="submit" style="width: 30%; min-height: 0px;">
 						</form>
 
 					</div>
@@ -89,9 +110,10 @@
 				document.getElementById('message-column').innerHTML = htmlSnippet;})
 			.catch(error => console.error("Error:", error));
 
-		if(!stompClient){
-			Stomp();
+		if (subscription){
+			subscription.unsubscribe();
 		}
+		Stomp();
 	}
 
 	function Stomp (){
@@ -106,7 +128,7 @@
 		});
 
 		stompClient.onConnect = function (frame) {
-			stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
+			subscription = stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
 				
 				const parsedMessage = JSON.parse(message.body)
 
