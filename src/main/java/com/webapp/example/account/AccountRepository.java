@@ -137,4 +137,13 @@ public class AccountRepository {
         .listOfRows()
         .size();
   }
+
+  /**
+   * Testing method, persists a list of accounts to the Account table
+   *
+   * @param accounts
+   */
+  public void saveAll(List<Account> accounts) {
+    accounts.forEach(this::create);
+  }
 }

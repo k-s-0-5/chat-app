@@ -54,6 +54,27 @@ public class ParticipantRepository {
   }
 
   /**
+   * Replaces participant where participant.id = id with updatedParticipant
+   *
+   * @param participant
+   * @param id
+   */
+  public void update(Participant updatedParticipant, Integer id) {
+    jdbcClient
+        .sql(
+            """
+            UPDATE Conversation SET accountId = ?,
+            conversationId = ?, role = ? where id = ?
+            """)
+        .params(
+            updatedParticipant.accountId(),
+            updatedParticipant.conversationId(),
+            updatedParticipant.role(),
+            id)
+        .update();
+  }
+
+  /**
    * Deletes participant where participant.id = id
    *
    * @param id

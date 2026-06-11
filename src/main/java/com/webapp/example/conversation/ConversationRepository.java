@@ -117,7 +117,7 @@ public class ConversationRepository {
   }
 
   /**
-   * Testing method, persists a list of Conversations to the Conversation table
+   * Testing method, persists a list of conversations to the Conversation table
    *
    * @param conversations
    */
