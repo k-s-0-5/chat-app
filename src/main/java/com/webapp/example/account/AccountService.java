@@ -37,11 +37,16 @@ public class AccountService {
     return account.get();
   }
 
-  void register(Account account) {
+  public String register(Account account) {
     account =
         new Account(
-            account.id(), account.username(), account.email(), encoder.encode(account.password()));
+            UUID.randomUUID(),
+            account.username(),
+            account.email(),
+            encoder.encode(account.password()),
+            "ROLE_USER");
     accountRepository.create(account);
+    return verify(account);
   }
 
   public String verify(Account account) {
@@ -51,7 +56,7 @@ public class AccountService {
     if (authentication.isAuthenticated()) {
       return jwtService.generateToken(account.username());
     } else {
-      return "Token validation unsuccessful";
+      return "";
     }
   }
 

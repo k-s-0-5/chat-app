@@ -24,11 +24,6 @@ public class MessageController {
     this.messageRepository = messageRepository;
   }
 
-  @GetMapping("")
-  List<Message> findAll() {
-    return messageRepository.findAll();
-  }
-
   @GetMapping("/{id}")
   Message findById(@PathVariable long id) {
     Optional<Message> message = messageRepository.findById(id);
@@ -40,7 +35,7 @@ public class MessageController {
 
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("")
-  void create(@Valid @RequestBody Message message) {
+  void create(@RequestBody Message message) {
     messageRepository.create(message);
   }
 

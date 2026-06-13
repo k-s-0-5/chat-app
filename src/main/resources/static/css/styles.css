@@ -42,6 +42,8 @@ input[type="submit"] {
 button {
   border: 0;
   width: 100%;
+  min-height: 25px;
+  min-width: 50px;
   white-space: nowrap;     
   overflow: hidden;        
   text-overflow: clip; 
@@ -115,11 +117,6 @@ input::placeholder {
     0 0 50px #ff005e,
     0 0 70px #ff005e;
   animation: glow 1.5s infinite alternate;
-}
-
-.area {
-  outline: 2px solid rgba(40,40,40,.1);
-  outline-offset: -1px;
 }
 
 /* https://stackoverflow.com/questions/32208665/fit-width-of-div-tightly-to-multi-line-span */

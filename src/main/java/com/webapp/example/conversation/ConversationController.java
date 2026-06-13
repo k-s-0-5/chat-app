@@ -26,11 +26,6 @@ public class ConversationController {
     this.conversationRepository = conversationRepository;
   }
 
-  @GetMapping("")
-  List<Conversation> findAll(Model model) {
-    return conversationRepository.findAll();
-  }
-
   @GetMapping("/{id}")
   Conversation findById(@PathVariable UUID id) {
     Optional<Conversation> conversation = conversationRepository.findById(id);
@@ -42,7 +37,7 @@ public class ConversationController {
 
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("")
-  void create(@Valid @RequestBody Conversation conversation) {
+  void create(@RequestBody Conversation conversation) {
     conversationRepository.create(conversation);
   }
 

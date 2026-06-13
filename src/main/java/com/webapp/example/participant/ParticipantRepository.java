@@ -23,7 +23,7 @@ public class ParticipantRepository {
    *
    * @return List of all participants
    */
-  List<Participant> findAllWithAccount(Account account) {
+  public List<Participant> findAllWithAccount(Account account) {
     return jdbcClient
         .sql(
             """

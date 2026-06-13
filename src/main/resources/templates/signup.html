@@ -13,8 +13,9 @@
 					<div>こ</div>
 					<div>そ</div>
 				</div>
-				<form th:action="@{/perform-login}" method="post" class="card--vertical" style="width: 50%; background-color: rgba(40,40,40,.1);">
-						<input type="text" name="username" placeholder="Username"/>
+				<form th:action="@{/signup}" method="post" class="card--vertical" style="width: 50%; background-color: rgba(40,40,40,.1);">
+                        <input type="text" name="username" placeholder="Username"/>
+						<input type="email" name="email" placeholder="Email"/>
 						<input type="password" name="password" placeholder="Password"/>
 						<input class="neon-box" type="submit" value="LOG IN"/>
 				</form>

@@ -35,7 +35,7 @@ public class SecurityConfig {
             request ->
                 request
                     .requestMatchers(
-                        "/login", "/perform-login", "/css/**", "/js/**", "/images/**", "/static/**")
+                        "/signup", "/login", "/perform-login", "/css/**", "/js/**", "/images/**", "/static/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

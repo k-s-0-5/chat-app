@@ -72,4 +72,19 @@ public class ViewController {
       return "redirect:/login";
     }
   }
+
+  @PostMapping("/signup")
+  public String signup(@ModelAttribute Account account, HttpServletResponse response) {
+    String token = accountService.register(account);
+
+    if (token != null && !token.isEmpty()) {
+      Cookie jwtCookie = new Cookie("jwt_token", token);
+      jwtCookie.setHttpOnly(true);
+      jwtCookie.setPath("/");
+      response.addCookie(jwtCookie);
+      return "redirect:/home";
+    } else {
+      return "redirect:/signup";
+    }
+  }
 }

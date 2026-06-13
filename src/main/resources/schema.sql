@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS Account (
     id UUID PRIMARY KEY,
     username VARCHAR(25) NOT NULL UNIQUE,
     email VARCHAR(254) NOT NULL UNIQUE,
-    password VARCHAR(128) NOT NULL
+    password VARCHAR(128) NOT NULL,
+    role VARCHAR(32) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Conversation (
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS Message (
     account_id UUID NOT NULL,
     conversation_id UUID NOT NULL,
     sent_at timestamp NOT NULL,
-    contents varchar(250) NOT NULL,
+    contents varchar(1000) NOT NULL,
     attachment_url varchar(100),
     is_read BOOLEAN,
     edited BOOLEAN,

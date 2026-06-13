@@ -20,7 +20,7 @@ public class ParticipantController {
     }
 
     @GetMapping("")
-    public List<Participant> findAll(Account account){
+    public List<Participant> findAllWithAccount(Account account){
         return participantRepository.findAllWithAccount(account);
     }
 }

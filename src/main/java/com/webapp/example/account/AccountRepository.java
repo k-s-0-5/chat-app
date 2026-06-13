@@ -78,13 +78,16 @@ public class AccountRepository {
         .sql(
             """
             INSERT INTO Account(
-            id, username, email, password)
-            values(?,?,?,?)
+            id, username, email, password, role)
+            values(?,?,?,?,?)
             """)
         .params(
             List.of(
-                account.id(), account.username(),
-                account.email(), account.password()))
+                account.id(),
+                account.username(),
+                account.email(),
+                account.password(),
+                account.role()))
         .update();
   }
 
@@ -99,11 +102,15 @@ public class AccountRepository {
         .sql(
             """
             UPDATE Account SET username = ?,
-            email = ?, password = ? where id = ?)
+            email = ?, password = ?, role = ? where id = ?)
             """)
         .params(
             List.of(
-                updatedAccount.username(), updatedAccount.email(), updatedAccount.password(), id))
+                updatedAccount.username(),
+                updatedAccount.email(),
+                updatedAccount.password(),
+                updatedAccount.role(),
+                id))
         .update();
   }
 

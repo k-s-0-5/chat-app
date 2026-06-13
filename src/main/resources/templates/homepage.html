@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
 	<head>
 		<title>Home</title>
-		<link rel="stylesheet" th:href="@{/css/styles.css}">
+		<link rel="stylesheet" th:href="@{/css/styles.css}" href="../static/css/styles.css">
 		<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
 	</head>
 	<body>
@@ -24,30 +24,34 @@
 				<div style="display: flex; height: 100%;">
 
 					<!-- Conversations lists -->
-					<div class="area" style="flex: 2; background-color: blanchedalmond;">
+					<div style="flex: 2;">
 						<div th:each="conversation : ${conversations}" style="padding: 7px;">
-							<button class="neon-box" onclick="FetchMessages(this)" th:data-id="${conversation.id}">
-								<div th:text="${conversation.title}"></div>
-								<div th:text="${conversation.lastSent}"></div>
+							<button style="background-color: rgba(40,40,40,.1);" class="neon-box" onclick="FetchMessages(this)" th:data-id="${conversation.id}">
+								<div style="color: #fff;" th:text="${conversation.title}"></div>
+								<div style="color: #ccc; font-size: smaller;" th:text="${#temporals.format(conversation.lastSent, 'dd/MM/yy hh:mm a')}">
+								</div>
 							</button>
 						</div>
 					</div>
 
 					<!-- Messages -->
-					<div class="area" style="flex: 4; background-color:beige; display: flex; gap:5px; flex-direction: column; padding: 20px; justify-content: space-between;">
-						<div id="message-column" style="background-color: aquamarine; flex-grow: 1; overflow-y: auto; height: 0px;">
+					<div style="border: 2px solid rgba(40,40,40,.2); flex: 4; display: flex; gap:5px; flex-direction: column; padding: 20px; justify-content: space-between;">
+						<div id="message-column" style="flex-grow: 1; overflow-y: auto; height: 0px;">
 							<div th:fragment="messageList" th:each="message : ${messages}" th:data-id="${message.id}">
-								<div class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
-									<small th:text="${message.sentAt}"></small>
+								<div style="color: #fff" class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
+									<small th:text="${#temporals.format(message.sentAt, 'dd/MM/yy, hh:mm a')}"></small>
 								</div>
 								<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--out' : 'message--in'">
 									<span th:text="${message.contents}"></span>
 								</div>
 							</div>
+							<div th:if="${messages == null}">
+								<p style="color: #fff; font-size: small; text-align: center;">Select a conversation</p>
+							</div>
 						</div>
 
 						<form id="message-form" method="post"
-								style="width: 100%; background-color: black; align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center;">
+								style="width: 100%; background-color: rgba(40,40,40,.1); align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center;">
 							<input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block; min-height: 0px;">
 							<input type="submit" style="width: 30%; min-height: 0px;">
 						</form>
@@ -55,7 +59,7 @@
 					</div>
 
 					<!-- WIP -->
-					<div class="area" style="flex: 1; background-color:antiquewhite">
+					<div style="flex: 1; background-color: #ccc;">
 						3
 					</div>
 
@@ -93,7 +97,6 @@
 			subscription.unsubscribe();
 		}
 		currentUserId = await fetchCurrentUserId();
-		console.log(currentUserId + "\n\n IT WORKS");
 		Stomp();
 	}
 
@@ -118,12 +121,22 @@
 
 				const isMe = (parsedMessage.accountId == currentUserId);
 				const messageClass = isMe ? 'message--out' : 'message--in';
-				console.log("message = " + parsedMessage.accountId + "\n" + "currentUserId = " + currentUserId);
 				const timeClass = isMe ? 'time--out' : 'time--in';
+
+				const now = new Date(parsedMessage.sentAt);
+				const time = new Intl.DateTimeFormat('en-US', {
+					day: '2-digit',
+					month: '2-digit',
+					year: '2-digit',
+					hour: '2-digit',
+					minute: '2-digit',
+					hour12: true
+				}).format(now);
+
 				
 				messageElement.innerHTML = `
 					<div class="message-time ${timeClass}">
-						<small>${parsedMessage.sentAt}</small>
+						<small style="color: #fff">${time}</small>
 					</div>
 					<div class="message ${messageClass}">
 						<span>${parsedMessage.contents}</span>

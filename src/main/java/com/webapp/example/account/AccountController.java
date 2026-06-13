@@ -59,7 +59,7 @@ public class AccountController {
 
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("")
-  void create(@Valid @RequestBody Account account) {
+  void create(@RequestBody Account account) {
     accountService.register(account);
   }
 
