@@ -1,7 +1,5 @@
 package com.webapp.example.message;
 
-import jakarta.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;

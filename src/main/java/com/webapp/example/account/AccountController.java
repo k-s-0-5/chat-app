@@ -1,7 +1,8 @@
 package com.webapp.example.account;
 
 import com.webapp.example.auth.UserPrincipal;
-import jakarta.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,6 +33,14 @@ public class AccountController {
   @GetMapping("/me")
   public UUID getCurrentAccountId(@AuthenticationPrincipal UserPrincipal principal) {
     return principal.getId();
+  }
+
+  @GetMapping("/search/{usernameSegment}")
+  public List<Account> findByUsernameSegment(@PathVariable String usernameSegment) {
+    if (usernameSegment.isEmpty()){
+      return List.of();
+    }
+    return accountRepository.findByUsernameSegment(usernameSegment);
   }
 
   @GetMapping("")

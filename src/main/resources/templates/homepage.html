@@ -16,7 +16,21 @@
 					2
 				</div>
 				<div style="width: 100px; min-height: 10vh; flex: 1; background-color: antiquewhite; text-align: center; align-content: center;">
-					3
+					
+
+						<div id="search-container" style="justify-content:center; margin-right: 17px; display: flex; flex-direction: row; align-items: center; gap: 5px;">
+							
+							<div style="display: flex; flex-direction: column; max-width: 300px;  position: relative; min-width: 50px;">
+								<input type="search" id="search" placeholder="Search" style="height:40px; width: 100%; border-radius: 7px 7px 0px 0px; margin:0px;" >
+								<div class="results" id="results">
+
+								</div>
+							</div>
+
+							<button onclick="searchForUser()" style="width: 40px; height:40px; min-width: 40px; min-height: 40px; ">S</button>
+						</div>
+
+
 				</div>
 			</header>
 
@@ -36,8 +50,8 @@
 
 					<!-- Messages -->
 					<div style="border: 2px solid rgba(40,40,40,.2); flex: 4; display: flex; gap:5px; flex-direction: column; padding: 20px; justify-content: space-between;">
-						<div id="message-column" style="flex-grow: 1; overflow-y: auto; height: 0px;">
-							<div th:fragment="messageList" th:each="message : ${messages}" th:data-id="${message.id}">
+						<div id="message-column" style="flex-grow: 1; overflow-y: auto; height: 0px; ">
+							<div th:fragment="messageList" th:each="message : ${messages}" th:data-id="${message.id}" style="margin-right: 5px;">
 								<div style="color: #fff" class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
 									<small th:text="${#temporals.format(message.sentAt, 'dd/MM/yy, hh:mm a')}"></small>
 								</div>
@@ -53,7 +67,7 @@
 						<form id="message-form" method="post"
 								style="width: 100%; background-color: rgba(40,40,40,.1); align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center;">
 							<input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block; min-height: 0px;">
-							<input type="submit" style="width: 30%; min-height: 0px;">
+							<input type="submit" style="width: 30%; min-height: 0px; min-width: 50px; max-width: 100px;" value="Send">
 						</form>
 
 					</div>
@@ -75,6 +89,38 @@
 	let subscription = null;
 	let stompClient = null;
 	let currentUserId = null;
+	const results = document.getElementById("results");
+	const excludedDiv = document.getElementById('search-container');
+	const search = document.getElementById("search");
+
+
+	// Listeners
+	// Message submit listener
+	document.getElementById("message-form")
+    .addEventListener("submit", async e => {
+		e.preventDefault();
+		const message = {
+			conversationId: conversationId,
+			contents: document.getElementById("message-input").value
+		};
+		if (!message.contents || !conversationId) {
+			return;
+		}
+		stompClient.publish({
+			destination: "/ws/messages.send",
+			body: JSON.stringify(message)
+		});
+		document.getElementById("message-input").value = "";
+	})
+
+	document.addEventListener('click', (event) => {
+	if (!excludedDiv.contains(event.target)) {
+		clearSearchResults();
+	}
+	});
+
+
+	//Functions
 
 	async function FetchMessages(element) {
 		event.preventDefault();
@@ -115,31 +161,21 @@
 			subscription = stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
 				
 				const parsedMessage = JSON.parse(message.body)
-
 				const messageContainer = document.getElementById("message-column");
 				const messageElement = document.createElement("div");
-
 				const isMe = (parsedMessage.accountId == currentUserId);
 				const messageClass = isMe ? 'message--out' : 'message--in';
 				const timeClass = isMe ? 'time--out' : 'time--in';
-
-				const now = new Date(parsedMessage.sentAt);
-				const time = new Intl.DateTimeFormat('en-US', {
-					day: '2-digit',
-					month: '2-digit',
-					year: '2-digit',
-					hour: '2-digit',
-					minute: '2-digit',
-					hour12: true
-				}).format(now);
-
+				const time = getFormattedTime(parsedMessage.sentAt);
 				
 				messageElement.innerHTML = `
-					<div class="message-time ${timeClass}">
-						<small style="color: #fff">${time}</small>
-					</div>
-					<div class="message ${messageClass}">
-						<span>${parsedMessage.contents}</span>
+					<div style="margin-right: 5px;">
+						<div class="message-time ${timeClass}">
+							<small style="color: #fff">${time}</small>
+						</div>
+						<div class="message ${messageClass}">
+							<span>${parsedMessage.contents}</span>
+						</div>
 					</div>
 				`;
 				
@@ -156,7 +192,50 @@
 		stompClient.activate();
 	}
 
+	function getFormattedTime(timestamp){
+		const now = new Date(timestamp);
+		return new Intl.DateTimeFormat('en-UK', {
+			day: '2-digit',
+			month: '2-digit',
+			year: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+			hour12: true
+		}).format(now);
+	}
 
+	// Finds users whose username contains the search entry and appends results to search results
+	async function searchForUser(){
+		try {
+			const response = await fetch(`/accounts/search/${encodeURIComponent(search.value)}`);
+			if (response.ok){
+				const accounts = await response.json(); // JSON list of accounts containing matching values
+				if (accounts.length > 0) {
+					clearSearchResults();
+					for (var i = 0; i < accounts.length; i++) {
+						const resultElement = document.createElement("div");
+						let style = 'result'; // Pick appropriate styling
+						if (i == accounts.length - 1){
+							style = 'result result--final';
+						}
+						resultElement.innerHTML = `
+							<button class="${style}" >
+								${accounts[i].username}
+							</button>
+						`;
+						results.appendChild(resultElement);
+					}
+				}
+			} else {
+				console.log("No response");
+			}
+		}
+		catch (error) {
+			console.error(error);
+		}
+	}
+
+	// Retrieves currently logged in user
 	async function fetchCurrentUserId(){
 		try {
 			const response = await fetch('/accounts/me');
@@ -164,31 +243,15 @@
 				const userData = await response.json();
 				return userData;
 			} else {
+				console.log("No response");
 			}
 		}
 		catch (error) {
+			console.error(error);
 		}
 	}
 
-
-	document.getElementById("message-form")
-    .addEventListener("submit", async e => {
-		e.preventDefault();
-
-		const message = {
-			conversationId: conversationId,
-			contents: document.getElementById("message-input").value
-		};
-		
-		if (!message.contents || !conversationId) {
-			return;
-		}
-
-		stompClient.publish({
-			destination: "/ws/messages.send",
-			body: JSON.stringify(message)
-		});
-
-		document.getElementById("message-input").value = "";
-	})
+	function clearSearchResults(){
+		results.replaceChildren();
+	}
 </script>

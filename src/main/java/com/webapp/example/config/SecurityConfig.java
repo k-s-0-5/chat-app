@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final UserDetailsService userDetailsService;
-
   private final JWTFilter jwtFilter;
 
   SecurityConfig(UserDetailsService userDetailsService, JWTFilter jwtFilter) {
@@ -35,7 +34,7 @@ public class SecurityConfig {
             request ->
                 request
                     .requestMatchers(
-                        "/signup", "/login", "/perform-login", "/css/**", "/js/**", "/images/**", "/static/**")
+                        "/signup", "/login", "/perform-login", "/perform-signup", "/css/**", "/js/**", "/images/**", "/static/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
@@ -44,7 +43,6 @@ public class SecurityConfig {
     http.sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-    // .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

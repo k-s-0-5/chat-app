@@ -39,6 +39,11 @@ public class ViewController {
     return "login";
   }
 
+  @GetMapping("/signup")
+  public String signup() {
+    return "signup";
+  }
+
   @GetMapping("/home")
   public String home(Model model, @AuthenticationPrincipal UserPrincipal principal) {
     Account account = accountService.findByUsername(principal.getUsername());
@@ -73,9 +78,10 @@ public class ViewController {
     }
   }
 
-  @PostMapping("/signup")
+  @PostMapping("/perform-signup")
   public String signup(@ModelAttribute Account account, HttpServletResponse response) {
-    String token = accountService.register(account);
+    accountService.register(account);
+    String token = accountService.verify(account);
 
     if (token != null && !token.isEmpty()) {
       Cookie jwtCookie = new Cookie("jwt_token", token);

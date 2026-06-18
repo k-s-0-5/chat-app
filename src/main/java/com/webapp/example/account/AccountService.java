@@ -37,7 +37,7 @@ public class AccountService {
     return account.get();
   }
 
-  public String register(Account account) {
+  public void register(Account account) {
     account =
         new Account(
             UUID.randomUUID(),
@@ -46,7 +46,6 @@ public class AccountService {
             encoder.encode(account.password()),
             "ROLE_USER");
     accountRepository.create(account);
-    return verify(account);
   }
 
   public String verify(Account account) {
@@ -60,10 +59,21 @@ public class AccountService {
     }
   }
 
+  public void testRegister(Account account) {
+    account =
+        new Account(
+            account.id(),
+            account.username(),
+            account.email(),
+            encoder.encode(account.password()),
+            account.role());
+    accountRepository.create(account);
+  }
+
   /*
       Method to bulk save accounts for testing purposes
   **/
   public void saveAll(List<Account> accounts) {
-    accounts.forEach(this::register);
+    accounts.forEach(this::testRegister);
   }
 }
