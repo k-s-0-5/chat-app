@@ -16,12 +16,12 @@ public class ChatWebSocketController {
     this.messagingTemplate = messagingTemplate;
   }
 
-  //   Important note, SecurityContextHolder is a thread-local utility meaning it does not work
+  // Important note, SecurityContextHolder is a thread-local utility meaning it does not work
   // with WebSockets, principals do work however
   @MessageMapping("/messages.send")
   public void handleMessage(Message message, Principal principal) {
-    System.out.println("Message from user: " + principal.getName());
     Message fullMessage = messageService.createMessage(message, principal.getName());
-    messagingTemplate.convertAndSend("/topic/messages." + fullMessage.conversationId(), fullMessage);
+    messagingTemplate.convertAndSend(
+        "/topic/messages." + fullMessage.conversationId(), fullMessage);
   }
 }

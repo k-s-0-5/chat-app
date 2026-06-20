@@ -14,7 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-// Just chooses which requests are permitted and what encoder is used
+/** Just chooses which requests are permitted and what encoder is used */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -34,11 +34,18 @@ public class SecurityConfig {
             request ->
                 request
                     .requestMatchers(
-                        "/signup", "/login", "/perform-login", "/perform-signup", "/css/**", "/js/**", "/images/**", "/static/**")
+                        "/signup",
+                        "/login",
+                        "/perform-login",
+                        "/perform-signup",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/static/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
-        .formLogin(form -> form.loginPage("/login").defaultSuccessUrl("/homepage"));
+        .formLogin(form -> form.loginPage("/login"));
 
     http.sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
