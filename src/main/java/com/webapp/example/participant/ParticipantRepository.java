@@ -2,6 +2,8 @@ package com.webapp.example.participant;
 
 import com.webapp.example.account.Account;
 import java.util.List;
+import java.util.UUID;
+
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +18,32 @@ public class ParticipantRepository {
 
   public ParticipantRepository(JdbcClient jdbcClient) {
     this.jdbcClient = jdbcClient;
+  }
+
+ /**
+   * Returns true if a common conversation exists between all users
+   *
+   * @param id
+   * @return boolean
+   */
+  public boolean commonConversationExists(List<UUID> accountIds) {
+    if (accountIds.isEmpty()) {
+        return false; 
+    }
+    return jdbcClient
+    .sql("""
+        SELECT EXISTS (
+            SELECT COUNT(*)
+            FROM Participant 
+            WHERE account_id IN (:account_ids)
+            GROUP BY conversation_id 
+            HAVING COUNT(DISTINCT account_id) = :accountCount
+        )
+        """)
+    .param("account_ids", accountIds)
+    .param("accountCount", accountIds.size())
+    .query(Boolean.class) 
+    .single();
   }
 
   /**
@@ -44,12 +72,12 @@ public class ParticipantRepository {
         .sql(
             """
             INSERT INTO Participant(
-            id, account_id, conversation_id, role)
-            values(?,?,?,?)
+            account_id, conversation_id, role)
+            values(?,?,?)
             """)
         .params(
-            participant.id(), participant.accountId(),
-            participant.conversationId(), participant.role())
+            participant.accountId(), participant.conversationId(), 
+            participant.role())
         .update();
   }
 

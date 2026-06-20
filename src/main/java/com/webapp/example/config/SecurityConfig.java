@@ -38,7 +38,7 @@ public class SecurityConfig {
                     .permitAll()
                     .anyRequest()
                     .authenticated())
-        .formLogin(form -> form.loginPage("/login"));
+        .formLogin(form -> form.loginPage("/login").defaultSuccessUrl("/homepage"));
 
     http.sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

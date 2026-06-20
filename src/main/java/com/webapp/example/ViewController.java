@@ -8,6 +8,7 @@ import com.webapp.example.message.Message;
 import com.webapp.example.message.MessageService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class ViewController {
@@ -46,8 +48,9 @@ public class ViewController {
 
   @GetMapping("/home")
   public String home(Model model, @AuthenticationPrincipal UserPrincipal principal) {
-    Account account = accountService.findByUsername(principal.getUsername());
-    model.addAttribute("conversations", conversationService.getMyConversations(account));
+    model.addAttribute(
+        "conversations",
+        conversationService.getMyConversations(principal.getAccount()));
     return "homepage";
   }
 
@@ -55,12 +58,39 @@ public class ViewController {
   public String getConversationMessages(
       @PathVariable UUID conversationId,
       Model model,
-      @AuthenticationPrincipal UserPrincipal principal) {
+      @AuthenticationPrincipal UserPrincipal principal,
+      jakarta.servlet.http.HttpServletRequest request) {
     List<Message> messages = messageService.findByConversationId(conversationId);
     model.addAttribute("messages", messages);
     model.addAttribute("currentUserId", principal.getId());
 
-    return "homepage :: messageList";
+    String requestedWith = request.getHeader("X-Requested-With");
+    if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
+      return "homepage :: messageList";
+    }
+
+    model.addAttribute(
+        "conversations",
+        conversationService.getMyConversations(principal.getAccount()));
+    return "homepage";
+  }
+
+  @PostMapping("/conversation")
+  public String makeConversation(
+      @RequestBody List<UUID> accountIds,
+      Model model,
+      @AuthenticationPrincipal UserPrincipal principal) {
+
+    List<Account> accounts = new ArrayList<Account>();
+    accounts.add(accountService.findByUsername(principal.getUsername()));
+    for (int i = 0; i < accountIds.size(); i++) {
+      accounts.add(accountService.findById(accountIds.get(i)));
+    }
+    conversationService.createConversation(accounts);
+
+    model.addAttribute("conversations", conversationService.getMyConversations(principal.getAccount()));
+
+    return "homepage :: conversationList";
   }
 
   @PostMapping("/perform-login")

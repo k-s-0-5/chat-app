@@ -31,6 +31,10 @@ public class UserPrincipal implements UserDetails {
     return account.username();
   }
 
+  public Account getAccount() {
+    return account;
+  }
+
   public UUID getId() {
     return account.id();
   }

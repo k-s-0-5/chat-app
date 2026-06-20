@@ -9,45 +9,34 @@
 		<div class="color" style="width: 100%; height:100%; display: flex; flex-direction: column; overflow: hidden;">
 			
 			<header>
-				<div style="width: 100px; min-height: 10vh; flex: 1; background-color: blanchedalmond; text-align: center; align-content: center;">
-					1
+				<div style="width: 100px; min-height: 10vh; flex: 1; text-align: center; align-content: center;">
 				</div>
-				<div style="width: 100px; min-height: 10vh; flex: 1; background-color: beige; text-align: center; align-content: center;">
-					2
+				<div style="width: 100px; min-height: 10vh; flex: 1;text-align: center; align-content: center;">
 				</div>
-				<div style="width: 100px; min-height: 10vh; flex: 1; background-color: antiquewhite; text-align: center; align-content: center;">
-					
-
-						<div id="search-container" style="justify-content:center; margin-right: 17px; display: flex; flex-direction: row; align-items: center; gap: 5px;">
-							
-							<div style="display: flex; flex-direction: column; max-width: 300px;  position: relative; min-width: 50px;">
-								<input type="search" id="search" placeholder="Search" style="height:40px; width: 100%; border-radius: 7px 7px 0px 0px; margin:0px;" >
-								<div class="results" id="results">
-
-								</div>
-							</div>
-
-							<button onclick="searchForUser()" style="width: 40px; height:40px; min-width: 40px; min-height: 40px; ">S</button>
+				<div style="width: 100px; min-height: 10vh; flex: 1; text-align: center; align-content: center;">
+					<div id="search-container" style="justify-content:center; margin-right: 17px; display: flex; flex-direction: row; align-items: center; gap: 5px;">
+						<div style="display: flex; flex-direction: column; max-width: 300px;  position: relative; min-width: 50px;">
+							<input type="search" id="search" placeholder="Search">
+							<div class="results" id="results"></div>
 						</div>
-
-
+						<button class="neon-box" onclick="searchForUser()" style="width: 40px; height:40px; min-width: 40px; min-height: 40px; margin-left: 5px;">S</button>
+					</div>
 				</div>
 			</header>
-
 			<div style="width:80vw; align-self: center; flex: 1;">
 				<div style="display: flex; height: 100%;">
-
 					<!-- Conversations lists -->
 					<div style="flex: 2;">
-						<div th:each="conversation : ${conversations}" style="padding: 7px;">
-							<button style="background-color: rgba(40,40,40,.1);" class="neon-box" onclick="FetchMessages(this)" th:data-id="${conversation.id}">
-								<div style="color: #fff;" th:text="${conversation.title}"></div>
-								<div style="color: #ccc; font-size: smaller;" th:text="${#temporals.format(conversation.lastSent, 'dd/MM/yy hh:mm a')}">
-								</div>
-							</button>
+						<div id="conversations-column" style="flex-grow: 1; overflow-y: auto;">
+							<div th:fragment="conversationList" th:each="conversation : ${conversations}" style="padding: 7px;">
+								<button class="neon-box" onclick="fetchMessages(this)" th:data-id="${conversation.id}">
+									<div style="color: #fff;" th:text="${conversation.title}"></div>
+									<div style="color: #ccc; font-size: smaller;" th:text="${#temporals.format(conversation.lastSent, 'dd/MM/yy hh:mm a')}">
+									</div>
+								</button>
+							</div>
 						</div>
 					</div>
-
 					<!-- Messages -->
 					<div style="border: 2px solid rgba(40,40,40,.2); flex: 4; display: flex; gap:5px; flex-direction: column; padding: 20px; justify-content: space-between;">
 						<div id="message-column" style="flex-grow: 1; overflow-y: auto; height: 0px; ">
@@ -63,20 +52,15 @@
 								<p style="color: #fff; font-size: small; text-align: center;">Select a conversation</p>
 							</div>
 						</div>
-
 						<form id="message-form" method="post"
-								style="width: 100%; background-color: rgba(40,40,40,.1); align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center;">
+								style="width: 100%; align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center;">
 							<input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block; min-height: 0px;">
-							<input type="submit" style="width: 30%; min-height: 0px; min-width: 50px; max-width: 100px;" value="Send">
+							<input class="neon-box" type="submit" style="width: 30%; min-height: 0px; min-width: 50px; max-width: 100px;" value="Send">
 						</form>
-
 					</div>
-
 					<!-- WIP -->
-					<div style="flex: 1; background-color: #ccc;">
-						3
+					<div style="flex: 1;">
 					</div>
-
 				</div>
 			</div>
 		</div>
@@ -119,10 +103,14 @@
 	}
 	});
 
+	document.addEventListener("DOMContentLoaded", () => {
+    	currentUserId = fetchCurrentUserId();
+	});
+
 
 	//Functions
 
-	async function FetchMessages(element) {
+	async function fetchMessages(element) {
 		event.preventDefault();
 
 		if(conversationId != null){
@@ -132,21 +120,22 @@
 		selectedElement = element;
 		conversationId = element.getAttribute('data-id');
 		element.classList.add("selected-box");
-
-		fetch(`/conversation/${conversationId}/messages`)
+		fetch(`/conversation/${conversationId}/messages`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
 			.then(response => response.text())
 			.then(htmlSnippet => {
-				document.getElementById('message-column').innerHTML = htmlSnippet;})
-			.catch(error => console.error("Error:", error));
+				document.getElementById('message-column').innerHTML = htmlSnippet;
+
+				history.pushState({ id: conversationId }, '', `/conversation/${conversationId}/messages`);
+			})
+			.catch(error => console.error("No response"));
 
 		if (subscription){
 			subscription.unsubscribe();
 		}
-		currentUserId = await fetchCurrentUserId();
-		Stomp();
+		stomp();
 	}
 
-	function Stomp (){
+	function stomp (){
 		stompClient = new StompJs.Client({
 			brokerURL: 'ws://localhost:8080/connect',
 			debug: function (str) {
@@ -192,18 +181,6 @@
 		stompClient.activate();
 	}
 
-	function getFormattedTime(timestamp){
-		const now = new Date(timestamp);
-		return new Intl.DateTimeFormat('en-UK', {
-			day: '2-digit',
-			month: '2-digit',
-			year: '2-digit',
-			hour: '2-digit',
-			minute: '2-digit',
-			hour12: true
-		}).format(now);
-	}
-
 	// Finds users whose username contains the search entry and appends results to search results
 	async function searchForUser(){
 		try {
@@ -212,6 +189,8 @@
 				const accounts = await response.json(); // JSON list of accounts containing matching values
 				if (accounts.length > 0) {
 					clearSearchResults();
+					search.style.borderRadius = "7px 7px 0px 0px";
+
 					for (var i = 0; i < accounts.length; i++) {
 						const resultElement = document.createElement("div");
 						let style = 'result'; // Pick appropriate styling
@@ -219,7 +198,7 @@
 							style = 'result result--final';
 						}
 						resultElement.innerHTML = `
-							<button class="${style}" >
+							<button class="${style}" value="${accounts[i].id}" onclick="createConversation(this)">
 								${accounts[i].username}
 							</button>
 						`;
@@ -235,12 +214,39 @@
 		}
 	}
 
+	async function createConversation(element) {
+		if (currentUserId == element.value){
+			return;
+		}
+		try {
+			const accountIds = [element.value];
+
+			const response = await fetch(`/conversation`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Requested-With': 'XMLHttpRequest'
+			},
+			body: JSON.stringify(accountIds)
+			}).then(response => response.text())
+				.then(htmlSnippet => {
+					document.getElementById('conversations-column').innerHTML = htmlSnippet;})
+				.catch(error => console.error("No response"));
+			clearSearchResults();
+
+		}
+		catch (error) {
+			console.error(error);
+		}
+	}
+
 	// Retrieves currently logged in user
 	async function fetchCurrentUserId(){
 		try {
 			const response = await fetch('/accounts/me');
 			if (response.ok){
 				const userData = await response.json();
+				currentUserId = userData;
 				return userData;
 			} else {
 				console.log("No response");
@@ -251,7 +257,20 @@
 		}
 	}
 
+	function getFormattedTime(timestamp){
+		const now = new Date(timestamp);
+		return new Intl.DateTimeFormat('en-UK', {
+			day: '2-digit',
+			month: '2-digit',
+			year: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+			hour12: true
+		}).format(now);
+	}
+
 	function clearSearchResults(){
 		results.replaceChildren();
+		search.style.borderRadius = "7px";
 	}
 </script>

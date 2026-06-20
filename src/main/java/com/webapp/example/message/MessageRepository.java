@@ -73,20 +73,19 @@ public class MessageRepository {
         .sql(
             """
             INSERT INTO Message(
-            id, account_id, 
-            conversation_id, sent_at, 
-            contents, is_read, 
+            account_id, conversation_id, 
+            sent_at, contents, is_read, 
             edited)
-            values(?, ?, ?, ?, ?, ?, ?)
+            values(?, ?, ?, ?, ?, ?)
             """)
         .params(
-            message.id(),
             message.accountId(),
             message.conversationId(),
             message.sentAt(),
             message.contents(),
             message.isRead(),
-            message.edited())
+            message.edited()
+            )
         .update();
   }
 
