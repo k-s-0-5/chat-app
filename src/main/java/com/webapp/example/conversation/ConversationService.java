@@ -21,6 +21,17 @@ public class ConversationService {
   }
 
   /**
+   * Returns true if the account is in the conversation
+   *
+   * @param accountid
+   * @param conversationId
+   * @return boolean
+   */
+  public boolean isAccountInConversation(UUID accountid, UUID conversationId) {
+    return participantRepository.isAccountInConversation(accountid, conversationId);
+  }
+
+  /**
    * Returns a list of conversations where account is a participant
    *
    * @param account

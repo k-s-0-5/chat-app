@@ -35,11 +35,14 @@ public class Application {
     return args -> {
       UUID acc1 = UUID.randomUUID();
       UUID acc2 = UUID.randomUUID();
+      UUID acc3 = UUID.randomUUID();
       UUID con1 = UUID.randomUUID();
       accountService.testRegister(
           new Account(acc1, "user1", "user1@example.com", "1", "ROLE_USER"));
       accountService.testRegister(
           new Account(acc2, "user2", "user2@example.com", "2", "ROLE_USER"));
+      accountService.testRegister(
+          new Account(acc3, "user3", "user3@example.com", "3", "ROLE_USER"));
       conversationRepository.create(
           new Conversation(con1, "user1 & user2", LocalDateTime.parse("2026-04-25T10:01:00")));
       participationRepository.create(new Participant(1, acc1, con1, "ADMIN"));

@@ -44,7 +44,7 @@ public class AccountService {
             account.username(),
             account.email(),
             encoder.encode(account.password()),
-            account.role());
+            "ROLE_USER");
     accountRepository.create(account);
   }
 

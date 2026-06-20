@@ -21,9 +21,32 @@ public class ParticipantRepository {
   }
 
  /**
+   * Returns true if the account is in the conversation
+   *
+   * @param accountid
+   * @param conversationId
+   * @return boolean
+   */
+  public boolean isAccountInConversation(UUID accountid, UUID conversationId) {
+    return jdbcClient
+    .sql("""
+        SELECT EXISTS (
+            SELECT *
+            FROM Participant 
+            WHERE account_id = :accountId
+            AND conversation_id = :conversationId 
+        )
+        """)
+    .param("accountId", accountid)
+    .param("conversationId", conversationId)
+    .query(Boolean.class) 
+    .single();
+  }
+
+ /**
    * Returns true if a common conversation exists between all users
    *
-   * @param id
+   * @param accountIds
    * @return boolean
    */
   public boolean commonConversationExists(List<UUID> accountIds) {
@@ -35,12 +58,12 @@ public class ParticipantRepository {
         SELECT EXISTS (
             SELECT COUNT(*)
             FROM Participant 
-            WHERE account_id IN (:account_ids)
+            WHERE account_id IN (:accountIds)
             GROUP BY conversation_id 
             HAVING COUNT(DISTINCT account_id) = :accountCount
         )
         """)
-    .param("account_ids", accountIds)
+    .param("accountIds", accountIds)
     .param("accountCount", accountIds.size())
     .query(Boolean.class) 
     .single();

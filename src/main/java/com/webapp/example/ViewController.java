@@ -49,8 +49,7 @@ public class ViewController {
   @GetMapping("/home")
   public String home(Model model, @AuthenticationPrincipal UserPrincipal principal) {
     model.addAttribute(
-        "conversations",
-        conversationService.getMyConversations(principal.getAccount()));
+        "conversations", conversationService.getMyConversations(principal.getAccount()));
     return "homepage";
   }
 
@@ -59,7 +58,15 @@ public class ViewController {
       @PathVariable UUID conversationId,
       Model model,
       @AuthenticationPrincipal UserPrincipal principal,
-      jakarta.servlet.http.HttpServletRequest request) {
+      jakarta.servlet.http.HttpServletRequest request
+    ) {
+
+    if (!conversationService.isAccountInConversation(principal.getId(), conversationId)) {
+      model.addAttribute(
+          "conversations", conversationService.getMyConversations(principal.getAccount()));
+      return "redirect:/home";
+    }
+
     List<Message> messages = messageService.findByConversationId(conversationId);
     model.addAttribute("messages", messages);
     model.addAttribute("currentUserId", principal.getId());
@@ -70,8 +77,7 @@ public class ViewController {
     }
 
     model.addAttribute(
-        "conversations",
-        conversationService.getMyConversations(principal.getAccount()));
+        "conversations", conversationService.getMyConversations(principal.getAccount()));
     return "homepage";
   }
 
@@ -88,7 +94,8 @@ public class ViewController {
     }
     conversationService.createConversation(accounts);
 
-    model.addAttribute("conversations", conversationService.getMyConversations(principal.getAccount()));
+    model.addAttribute(
+        "conversations", conversationService.getMyConversations(principal.getAccount()));
 
     return "homepage :: conversationList";
   }
