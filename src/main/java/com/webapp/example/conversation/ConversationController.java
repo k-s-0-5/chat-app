@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/conversations")
 public class ConversationController {
 
+  @SuppressWarnings("unused")
   private final ConversationRepository conversationRepository;
 
   public ConversationController(ConversationRepository conversationRepository) {

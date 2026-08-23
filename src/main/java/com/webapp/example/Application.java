@@ -10,7 +10,6 @@ import com.webapp.example.message.MessageRepository;
 import com.webapp.example.participant.Participant;
 import com.webapp.example.participant.ParticipantRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.boot.CommandLineRunner;

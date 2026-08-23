@@ -2,18 +2,22 @@ package com.webapp.example;
 
 import com.webapp.example.account.Account;
 import com.webapp.example.account.AccountService;
+import com.webapp.example.account.SignupRequest;
 import com.webapp.example.auth.UserPrincipal;
 import com.webapp.example.conversation.ConversationService;
 import com.webapp.example.message.Message;
 import com.webapp.example.message.MessageService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,12 +41,14 @@ public class ViewController {
   }
 
   @GetMapping("/login")
-  public String login() {
+  public String login(Model model) {
+    model.addAttribute("signupRequest", new SignupRequest("", "", ""));
     return "login";
   }
 
   @GetMapping("/signup")
-  public String signup() {
+  public String signup(Model model) {
+    model.addAttribute("signupRequest", new SignupRequest("", "", ""));
     return "signup";
   }
 
@@ -58,8 +64,7 @@ public class ViewController {
       @PathVariable UUID conversationId,
       Model model,
       @AuthenticationPrincipal UserPrincipal principal,
-      jakarta.servlet.http.HttpServletRequest request
-    ) {
+      jakarta.servlet.http.HttpServletRequest request) {
 
     if (!conversationService.isAccountInConversation(principal.getId(), conversationId)) {
       model.addAttribute(
@@ -101,8 +106,13 @@ public class ViewController {
   }
 
   @PostMapping("/perform-login")
-  public String login(@ModelAttribute Account account, HttpServletResponse response) {
-    String token = accountService.verify(account);
+  public String login(@Valid @ModelAttribute SignupRequest signupRequest, BindingResult errors, HttpServletResponse response) {
+    
+    if (errors.hasErrors()){
+      return "redirect:/login";
+    }
+    
+    String token = accountService.verify(signupRequest);
 
     if (token != null && !token.isEmpty()) {
       Cookie jwtCookie = new Cookie("jwt_token", token);
@@ -116,9 +126,14 @@ public class ViewController {
   }
 
   @PostMapping("/perform-signup")
-  public String signup(@ModelAttribute Account account, HttpServletResponse response) {
-    accountService.register(account);
-    String token = accountService.verify(account);
+  public String signup(@Valid @ModelAttribute SignupRequest signupRequest, BindingResult errors, HttpServletResponse response) {
+
+    if (errors.hasErrors()){
+      return "signup";
+    }
+
+    accountService.register(signupRequest);
+    String token = accountService.verify(signupRequest);
 
     if (token != null && !token.isEmpty()) {
       Cookie jwtCookie = new Cookie("jwt_token", token);

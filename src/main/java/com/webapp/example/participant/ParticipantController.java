@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/participants")
 public class ParticipantController {
 
+  @SuppressWarnings("unused")
   private final ParticipantRepository participantRepository;
 
   public ParticipantController(ParticipantRepository participantRepository) {

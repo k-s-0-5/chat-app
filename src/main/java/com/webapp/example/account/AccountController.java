@@ -3,10 +3,13 @@ package com.webapp.example.account;
 import com.webapp.example.auth.UserPrincipal;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Rest controller for accounts */
@@ -25,6 +28,7 @@ public class AccountController {
    *
    * @return Id of logged in user
    */
+  @ResponseStatus(HttpStatus.OK) 
   @GetMapping("/me")
   public UUID getCurrentAccountId(@AuthenticationPrincipal UserPrincipal principal) {
     return principal.getId();
@@ -36,6 +40,7 @@ public class AccountController {
    * @param usernameSegment
    * @return returns a short list of accounts
    */
+  @ResponseStatus(HttpStatus.OK) 
   @GetMapping("/search/{usernameSegment}")
   public List<Account> findByUsernameSegment(@PathVariable String usernameSegment) {
     if (usernameSegment.isEmpty()) {

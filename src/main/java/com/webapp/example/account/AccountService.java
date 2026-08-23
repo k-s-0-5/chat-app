@@ -1,8 +1,8 @@
 package com.webapp.example.account;
 
+import com.webapp.example.Errors.AccountNotFoundException;
 import com.webapp.example.auth.JWTService;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,32 +28,30 @@ public class AccountService {
   }
 
   public Account findByUsername(String username) {
-    Optional<Account> account = accountRepository.findByUsername(username);
-    return account.get();
+    return accountRepository.findByUsername(username).orElseThrow(() -> new AccountNotFoundException(username));
   }
 
   public Account findById(UUID id) {
-    Optional<Account> account = accountRepository.findById(id);
-    return account.get();
+    return accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
   }
 
-  public void register(Account account) {
-    account =
+  public void register(SignupRequest signupRequest) {
+    Account account =
         new Account(
             UUID.randomUUID(),
-            account.username(),
-            account.email(),
-            encoder.encode(account.password()),
+            signupRequest.username(),
+            signupRequest.email(),
+            encoder.encode(signupRequest.password()),
             "ROLE_USER");
     accountRepository.create(account);
   }
 
-  public String verify(Account account) {
+  public String verify(SignupRequest signupRequest) {
     Authentication authentication =
         authManager.authenticate(
-            new UsernamePasswordAuthenticationToken(account.username(), account.password()));
+            new UsernamePasswordAuthenticationToken(signupRequest.username(), signupRequest.password()));
     if (authentication.isAuthenticated()) {
-      return jwtService.generateToken(account.username());
+      return jwtService.generateToken(signupRequest.username());
     } else {
       return "";
     }
