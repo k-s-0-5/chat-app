@@ -19,7 +19,9 @@
 							<input type="search" id="search" placeholder="Search">
 							<div class="results" id="results"></div>
 						</div>
-						<button class="neon-box" onclick="searchForUser()" style="width: 40px; height:40px; min-width: 40px; min-height: 40px; margin-left: 5px;">S</button>
+						<button class="neon-box" onclick="searchForUser()" style="width: 40px; height:40px; min-width: 40px; min-height: 40px; margin-left: 5px;">
+							<svg class="search" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+						</button>
 					</div>
 				</div>
 			</header>
@@ -98,20 +100,24 @@
 	})
 
 	document.addEventListener('click', (event) => {
-	if (!excludedDiv.contains(event.target)) {
-		clearSearchResults();
-	}
+		if (!excludedDiv.contains(event.target)) {
+			clearSearchResults();
+		}
 	});
 
-	document.addEventListener("DOMContentLoaded", () => {
-    	currentUserId = fetchCurrentUserId();
+	document.addEventListener("DOMContentLoaded", async () => {
+    	currentUserId = await fetchCurrentUserId();
+		const conversation = window.location.pathname.match(/\/conversation\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/messages/);
+		if (conversation){
+			fetchMessages(null, document.querySelector(`[data-id="${conversation[1]}"]`));
+		}
 	});
 
 
 	//Functions
 
 	async function fetchMessages(element) {
-		event.preventDefault();
+		if (!element || element.getAttribute('data-id') == conversationId) return;
 
 		if(conversationId != null){
 			selectedElement.classList.remove("selected-box");
@@ -124,7 +130,6 @@
 			.then(response => response.text())
 			.then(htmlSnippet => {
 				document.getElementById('message-column').innerHTML = htmlSnippet;
-
 				history.pushState({ id: conversationId }, '', `/conversation/${conversationId}/messages`);
 			})
 			.catch(error => console.error("No response"));
@@ -136,6 +141,10 @@
 	}
 
 	function stomp (){
+		if (stompClient) {
+			stompClient.deactivate();
+		}
+
 		stompClient = new StompJs.Client({
 			brokerURL: 'ws://localhost:8080/connect',
 			debug: function (str) {
@@ -148,25 +157,20 @@
 
 		stompClient.onConnect = function (frame) {
 			subscription = stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
-				
-				const parsedMessage = JSON.parse(message.body)
+				console.log('connect function ran');
+				const parsedMessage = JSON.parse(message.body);
 				const messageContainer = document.getElementById("message-column");
-				const messageElement = document.createElement("div");
 				const isMe = (parsedMessage.accountId == currentUserId);
 				const messageClass = isMe ? 'message--out' : 'message--in';
 				const timeClass = isMe ? 'time--out' : 'time--in';
 				const time = getFormattedTime(parsedMessage.sentAt);
-				
-				messageElement.innerHTML = `
-					<div style="margin-right: 5px;">
-						<div class="message-time ${timeClass}">
-							<small style="color: #fff">${time}</small>
-						</div>
-						<div class="message ${messageClass}">
-							<span>${parsedMessage.contents}</span>
-						</div>
-					</div>
-				`;
+
+				const messageElement = buildHTML('div', { style: "margin-right: 5px;" },
+					buildHTML('div', { className: `message-time ${timeClass}` }, 
+						buildHTML('small', { style: "color: #fff" }, createText(time))),
+					buildHTML('div', { className: `message ${messageClass}` }, 
+						buildHTML('span', null, createText(parsedMessage.contents)))
+					)
 				
 				messageContainer.appendChild(messageElement);
 				messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -255,6 +259,29 @@
 		catch (error) {
 			console.error(error);
 		}
+	}
+
+	function buildHTML (tag, attributes, ...children) {
+		const node = document.createElement(tag);
+		if (attributes){
+			for(const [key, value] of Object.entries(attributes)) {
+				if (key == 'style') {
+					node.style.cssText = value;
+				} else {
+					node[key] = value;
+				}
+			}
+		}
+
+		children.forEach(child => {
+			node.append(child);
+		})
+
+		return node;
+	}
+
+	function createText(text){
+		return document.createTextNode(text);
 	}
 
 	function getFormattedTime(timestamp){

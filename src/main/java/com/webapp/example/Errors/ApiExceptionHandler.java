@@ -21,8 +21,8 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ProblemDetail genericError(Exception ex, HttpServletRequest request) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An internal error occurred.");
-    }
+    // @ExceptionHandler(Exception.class)
+    // public ProblemDetail genericError(Exception ex, HttpServletRequest request) {
+    //     return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An internal error occurred.");
+    // }
 }

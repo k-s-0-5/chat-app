@@ -75,14 +75,14 @@ public class AccountRepository {
    * @param usernameSegment
    * @return List of accounts
    */
-  public List<Account> findByUsernameSegment(String usernameSegment) {
+  public List<AccountDTO> findByUsernameSegment(String usernameSegment) {
     return jdbcClient
         .sql(
             """
-            SELECT * FROM Account WHERE username LIKE :usernameSegment LIMIT 7;
+            SELECT id, username FROM Account WHERE username LIKE :usernameSegment LIMIT 7;
             """)
         .param("usernameSegment", "%" + usernameSegment + "%")
-        .query(Account.class)
+        .query(AccountDTO.class)
         .list();
   }
 

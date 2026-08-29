@@ -41,8 +41,11 @@ form {
   transform: translate(-50%, -50%);
   width: 20px;
   height: 20px;
-  font-family: 'Material Symbols Outlined';
-  color: #ffffff;
+}
+
+.search {
+  width: 20px;
+  height: 20px;
 }
 
 .form-pair {

@@ -2,6 +2,7 @@ package com.webapp.example;
 
 import com.webapp.example.account.Account;
 import com.webapp.example.account.AccountService;
+import com.webapp.example.account.LoginRequest;
 import com.webapp.example.account.SignupRequest;
 import com.webapp.example.auth.UserPrincipal;
 import com.webapp.example.conversation.ConversationService;
@@ -106,13 +107,9 @@ public class ViewController {
   }
 
   @PostMapping("/perform-login")
-  public String login(@Valid @ModelAttribute SignupRequest signupRequest, BindingResult errors, HttpServletResponse response) {
+  public String login(@ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
     
-    if (errors.hasErrors()){
-      return "redirect:/login";
-    }
-    
-    String token = accountService.verify(signupRequest);
+    String token = accountService.verify(loginRequest);
 
     if (token != null && !token.isEmpty()) {
       Cookie jwtCookie = new Cookie("jwt_token", token);
@@ -133,7 +130,7 @@ public class ViewController {
     }
 
     accountService.register(signupRequest);
-    String token = accountService.verify(signupRequest);
+    String token = accountService.verify(new LoginRequest(signupRequest.username(), signupRequest.password()));
 
     if (token != null && !token.isEmpty()) {
       Cookie jwtCookie = new Cookie("jwt_token", token);

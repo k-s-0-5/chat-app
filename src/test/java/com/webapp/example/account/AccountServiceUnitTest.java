@@ -28,7 +28,7 @@ import com.webapp.example.auth.JWTService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Account Service Tests")
-public class AccountServiceTest {
+public class AccountServiceUnitTest {
     @Mock
     private AccountRepository accountRepository;
     @Mock

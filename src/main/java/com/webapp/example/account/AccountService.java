@@ -46,12 +46,12 @@ public class AccountService {
     accountRepository.create(account);
   }
 
-  public String verify(SignupRequest signupRequest) {
+  public String verify(LoginRequest loginRequest) {
     Authentication authentication =
         authManager.authenticate(
-            new UsernamePasswordAuthenticationToken(signupRequest.username(), signupRequest.password()));
+            new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
     if (authentication.isAuthenticated()) {
-      return jwtService.generateToken(signupRequest.username());
+      return jwtService.generateToken(loginRequest.username());
     } else {
       return "";
     }
