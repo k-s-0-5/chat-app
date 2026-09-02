@@ -6,7 +6,7 @@ A local real-time chat application. The application uses a Spring Boot backend w
 ## About 
 <p align="center"><img width="522" height="522" alt="Class" src="https://github.com/user-attachments/assets/7dab590a-1932-4518-8013-26abbb7731ef" /></p>
 
-The diagram models the relation between the four primary entities of the application: Account, Message, Participant, and Conversation. Each account can send many messages, and participate in many conversations. Participant is a junction class which holds information about the Accounts role within a Conversation.
+The diagram models the relationships between the four primary entities of the application: Account, Message, Participant, and Conversation. Each account can send many messages, and participate in many conversations. Participant is a junction class which holds information about the Accounts role within a Conversation.
 
 
 
