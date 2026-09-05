@@ -44,10 +44,10 @@ public class Application {
           new Account(acc3, "user3", "user3@example.com", "3", "ROLE_USER"));
       conversationRepository.create(
           new Conversation(con1, "user1 & user2", LocalDateTime.parse("2026-04-25T10:01:00")));
-      participationRepository.create(new Participant(1, acc1, con1, "ADMIN"));
-      participationRepository.create(new Participant(2, acc2, con1, "USER"));
-      messageRepository.create(new Message((long)0, acc1, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hello there!", false, false));
-      messageRepository.create(new Message((long)0, acc2, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hi!", false, false));
+      participationRepository.create(new Participant(1, acc1, con1, LocalDateTime.now(), "ADMIN"));
+      participationRepository.create(new Participant(2, acc2, con1, LocalDateTime.now(), "USER"));
+      messageRepository.create(new Message((long)0, acc1, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hello there!", false));
+      messageRepository.create(new Message((long)1, acc2, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hi!", false));
 
     };
   }

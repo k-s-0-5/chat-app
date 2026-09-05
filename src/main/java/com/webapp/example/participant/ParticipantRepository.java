@@ -95,12 +95,12 @@ public class ParticipantRepository {
         .sql(
             """
             INSERT INTO Participant(
-            account_id, conversation_id, role)
-            values(?,?,?)
+            account_id, conversation_id, last_read, role)
+            values(?,?,?,?)
             """)
         .params(
             participant.accountId(), participant.conversationId(), 
-            participant.role())
+            participant.lastRead(), participant.role())
         .update();
   }
 
@@ -115,11 +115,12 @@ public class ParticipantRepository {
         .sql(
             """
             UPDATE Conversation SET accountId = ?,
-            conversationId = ?, role = ? where id = ?
+            conversationId = ?, last_read = ?, role = ? where id = ?
             """)
         .params(
             updatedParticipant.accountId(),
             updatedParticipant.conversationId(),
+            updatedParticipant.lastRead(),
             updatedParticipant.role(),
             id)
         .update();

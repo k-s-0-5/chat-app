@@ -10,5 +10,4 @@ public record Message(
     UUID conversationId,
     LocalDateTime sentAt,
     String contents,
-    boolean isRead,
     boolean edited) {}

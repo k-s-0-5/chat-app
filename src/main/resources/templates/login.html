@@ -13,7 +13,7 @@
 					<div>こ</div>
 					<div>そ</div>
 				</div>
-				<form th:action="@{/perform-login}" th:object="${signupRequest}" method="post" class="card--vertical" style="width: 50%; background-color: rgba(40,40,40,.1);">
+				<form th:action="@{/perform-login}" th:object="${loginRequest}" method="post" class="card--vertical" style="width: 50%; background-color: rgba(40,40,40,.1);">
 					<div class="form-pair">
 						<!-- <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error-message"></p> -->
 						<input type="text" th:field="*{username}" placeholder="Username"/>

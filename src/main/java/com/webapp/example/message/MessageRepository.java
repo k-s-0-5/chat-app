@@ -74,16 +74,15 @@ public class MessageRepository {
             """
             INSERT INTO Message(
             account_id, conversation_id, 
-            sent_at, contents, is_read, 
+            sent_at, contents, 
             edited)
-            values(?, ?, ?, ?, ?, ?)
+            values(?, ?, ?, ?, ?)
             """)
         .params(
             message.accountId(),
             message.conversationId(),
             message.sentAt(),
             message.contents(),
-            message.isRead(),
             message.edited()
             )
         .update();
@@ -102,8 +101,7 @@ public class MessageRepository {
             UPDATE Message set
             account_id = ?, conversation_id = ?,
             sent_at = ?, contents = ?, 
-            is_read = ?, edited = ? 
-            WHERE id = ?)
+            edited = ? WHERE id = ?)
             """)
         .params(
             List.of(
@@ -111,7 +109,6 @@ public class MessageRepository {
                 updatedMessage.conversationId(),
                 updatedMessage.sentAt(),
                 updatedMessage.contents(),
-                updatedMessage.isRead(),
                 updatedMessage.edited(),
                 id))
         .update();

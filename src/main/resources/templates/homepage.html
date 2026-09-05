@@ -144,7 +144,6 @@
 		if (stompClient) {
 			stompClient.deactivate();
 		}
-
 		stompClient = new StompJs.Client({
 			brokerURL: 'ws://localhost:8080/connect',
 			debug: function (str) {
@@ -157,31 +156,26 @@
 
 		stompClient.onConnect = function (frame) {
 			subscription = stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
-				console.log('connect function ran');
 				const parsedMessage = JSON.parse(message.body);
 				const messageContainer = document.getElementById("message-column");
 				const isMe = (parsedMessage.accountId == currentUserId);
 				const messageClass = isMe ? 'message--out' : 'message--in';
 				const timeClass = isMe ? 'time--out' : 'time--in';
 				const time = getFormattedTime(parsedMessage.sentAt);
-
 				const messageElement = buildHTML('div', { style: "margin-right: 5px;" },
 					buildHTML('div', { className: `message-time ${timeClass}` }, 
 						buildHTML('small', { style: "color: #fff" }, createText(time))),
 					buildHTML('div', { className: `message ${messageClass}` }, 
-						buildHTML('span', null, createText(parsedMessage.contents)))
+						buildHTML('span', null, createText(parsedMessage.contents))),
+						buildHTML('div', null, createText("TEST"))
 					)
-				
 				messageContainer.appendChild(messageElement);
 				messageContainer.scrollTop = messageContainer.scrollHeight;
-
 			});
 		};
-
 		stompClient.onStompError = function (frame) {
 			console.error('error');
 		};
-
 		stompClient.activate();
 	}
 

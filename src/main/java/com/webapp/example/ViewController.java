@@ -43,7 +43,7 @@ public class ViewController {
 
   @GetMapping("/login")
   public String login(Model model) {
-    model.addAttribute("signupRequest", new SignupRequest("", "", ""));
+    model.addAttribute("loginRequest", new LoginRequest("", ""));
     return "login";
   }
 

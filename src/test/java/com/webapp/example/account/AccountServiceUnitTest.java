@@ -94,21 +94,21 @@ public class AccountServiceUnitTest {
     class VerifyTests {
         @Test
         void testVerifySuccess() {
-            SignupRequest signupRequest = new SignupRequest("Test", "test@mail.com", encoder.encode("TestPassword"));
+            LoginRequest loginRequest = new LoginRequest("Test", encoder.encode("TestPassword"));
             Authentication authentication = mock(Authentication.class);
-            when(authManager.authenticate(new UsernamePasswordAuthenticationToken(signupRequest.username(), signupRequest.password()))).thenReturn(authentication);
+            when(authManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()))).thenReturn(authentication);
             when(authentication.isAuthenticated()).thenReturn(true);
-            String jwt = accountService.verify(signupRequest);
+            String jwt = accountService.verify(loginRequest);
             assertNotEquals(jwt, "");
         }
 
         @Test
         void testVerifyFail() {
-            SignupRequest signupRequest = new SignupRequest("Test", "test@mail.com", "TestPassword");
+            LoginRequest loginRequest = new LoginRequest("Test", "TestPassword");
             Authentication authentication = mock(Authentication.class);
-            when(authManager.authenticate(new UsernamePasswordAuthenticationToken(signupRequest.username(), signupRequest.password()))).thenReturn(authentication);
+            when(authManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()))).thenReturn(authentication);
             when(authentication.isAuthenticated()).thenReturn(false);
-            String jwt = accountService.verify(signupRequest);
+            String jwt = accountService.verify(loginRequest);
             assertEquals(jwt, "");
         }
     }

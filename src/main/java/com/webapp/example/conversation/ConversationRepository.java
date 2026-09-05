@@ -61,7 +61,7 @@ public class ConversationRepository {
         .sql(
             """
             INSERT INTO Conversation(
-            id, title, lastSent)
+            id, title, last_sent)
             values(?,?,?)
             """)
         .params(conversation.id(), conversation.title(), conversation.lastSent())
@@ -79,7 +79,7 @@ public class ConversationRepository {
         .sql(
             """
             UPDATE Conversation SET title = ?,
-            lastSent = ? where id = ?
+            last_sent = ? where id = ?
             """)
         .params(updatedConversation.title(), updatedConversation.lastSent(), id)
         .update();

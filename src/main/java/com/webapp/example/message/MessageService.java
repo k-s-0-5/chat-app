@@ -30,9 +30,7 @@ public class MessageService {
             message.conversationId(),
             LocalDateTime.now(),
             message.contents(),
-            false,
             false);
-    System.out.println(message.toString());
     messageRepository.create(fullMessage);
     return fullMessage;
   }
