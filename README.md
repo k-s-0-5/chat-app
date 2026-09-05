@@ -10,5 +10,5 @@ The diagram models the relationships between the four primary entities of the ap
 
 
 
-<p align="center"><img width="522" height="382" alt="Sequence" src="https://github.com/user-attachments/assets/de6e39f5-6da3-496c-b10f-02d3fe0fe9ff" /></p>
+<p align="center"><img width="522" height="382" alt="Sequence" src="https://github.com/user-attachments/assets/ed02d02f-273a-421d-87a6-99cdda52af1a" /></p>
 The diagram depicts a user sending a message. First the user connects to the Stomp client and subscribes to a conversation. The user then sends the contents of a message. The server persists a Message object and then distributes it to subscribers. The message is then rendered for each subscriber.
