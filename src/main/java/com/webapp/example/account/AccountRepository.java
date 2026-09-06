@@ -156,11 +156,10 @@ public class AccountRepository {
     return jdbcClient
         .sql(
             """
-            SELECT * FROM Account
+            SELECT COUNT(*) FROM Account
             """)
-        .query()
-        .listOfRows()
-        .size();
+        .query(Integer.class)
+        .single();
   }
 
   /**

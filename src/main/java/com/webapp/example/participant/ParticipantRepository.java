@@ -150,11 +150,10 @@ public class ParticipantRepository {
     return jdbcClient
         .sql(
             """
-            SELECT * FROM Participant
+            SELECT COUNT(*) FROM Participant
             """)
-        .query()
-        .listOfRows()
-        .size();
+        .query(Integer.class)
+        .single();
   }
 
   /**

@@ -109,11 +109,10 @@ public class ConversationRepository {
     return jdbcClient
         .sql(
             """
-            SELECT * FROM Conversation
+            SELECT COUNT(*) FROM Conversation
             """)
-        .query()
-        .listOfRows()
-        .size();
+        .query(Integer.class)
+        .single();
   }
 
   /**

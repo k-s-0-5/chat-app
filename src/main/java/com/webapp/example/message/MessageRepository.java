@@ -135,7 +135,7 @@ public class MessageRepository {
    * @return number of rows in the Message table
    */
   public int count() {
-    return jdbcClient.sql("SELECT * FROM Message").query().listOfRows().size();
+    return jdbcClient.sql("SELECT COUNT(*) FROM Message").query(Integer.class).single();
   }
 
   /**
