@@ -303,13 +303,16 @@ li {
 }
 
 .message-update{
-  transform: translate(-75%, 85%); 
+  transform: translate(-75%, 90%); 
   width: 20px;
   height: 20px; 
   position:absolute; 
   background-color: #ffffff; 
   border-radius: 100%;
   text-align: center;
+}
+.message-update:hover{
+  background-color: #ccc; 
 }
 
 .message--in {

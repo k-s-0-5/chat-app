@@ -49,7 +49,7 @@
 									<small th:text="${#temporals.format(message.sentAt, 'dd/MM/yy, hh:mm a')}"></small>
 								</div>
 								<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--out' : 'message--in'">
-									<div th:if="${message.accountId == currentUserId}" class="message-update"></div>
+									<a th:if="${message.accountId == currentUserId}" class="message-update"></a>
 									<span th:text="${message.contents}"></span>
 								</div>
 							</div>
@@ -67,7 +67,6 @@
             </div>
 	</body>
 </html>
-
 <script>
 	let conversationId = null;
 	let selectedElement = null;
@@ -77,7 +76,7 @@
 	const results = document.getElementById("results");
 	const excludedDiv = document.getElementById('search-container');
 	const search = document.getElementById("search");
-
+	const messageList = document.getElementById('message-list');
 
 	// Listeners
 	// Message submit listener
@@ -112,27 +111,35 @@
 		}
 	});
 
-
-	//Functions
-
+	// Functions
+	// Retrieve messages for a given conversation
 	async function fetchMessages(element) {
-		if (!element || element.getAttribute('data-id') == conversationId) return;
-
-		if(conversationId != null){
-			selectedElement.classList.remove("selected-box");
+		if (!element || element.getAttribute('data-id') == conversationId) {
+			return;
 		}
 
+		if(conversationId != null) {
+			selectedElement.classList.remove("selected-box");
+		}
 		selectedElement = element;
 		conversationId = element.getAttribute('data-id');
 		element.classList.add("selected-box");
-		fetch(`/conversation/${conversationId}/messages`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-			.then(response => response.text())
-			.then(htmlSnippet => {
-				document.getElementById('message-list').innerHTML = htmlSnippet;
-				history.pushState({ id: conversationId }, '', `/conversation/${conversationId}/messages`);
-			})
-			.catch(error => console.error("No response"));
 
+		try {
+			const response = await fetch(`/conversation/${conversationId}/messages`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+			
+			if (response.ok){
+				const html = await response.text();
+				document.getElementById('message-list').innerHTML = html;
+				history.pushState({ id: conversationId }, '', `/conversation/${conversationId}/messages`);
+			} else {
+				console.log("No response");
+			}
+		} catch (error) {
+			console.error(error);
+		}
+
+		// Connect to new conversation
 		if (subscription){
 			subscription.unsubscribe();
 		}
@@ -143,6 +150,7 @@
 		if (stompClient) {
 			stompClient.deactivate();
 		}
+
 		stompClient = new StompJs.Client({
 			brokerURL: 'ws://localhost:8080/connect',
 			debug: function (str) {
@@ -156,7 +164,6 @@
 		stompClient.onConnect = function (frame) {
 			subscription = stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
 				const parsedMessage = JSON.parse(message.body);
-				const messageContainer = document.getElementById('message-list');
 				const isMe = (parsedMessage.accountId == currentUserId);
 				const messageClass = isMe ? 'message--out' : 'message--in';
 				const timeClass = isMe ? 'time--out' : 'time--in';
@@ -167,13 +174,15 @@
 					buildHTML('div', { className: `message ${messageClass}` }, 
 						buildHTML('span', null, createText(parsedMessage.contents)))
 					)
-				messageContainer.appendChild(messageElement);
-				messageContainer.scrollTop = messageContainer.scrollHeight;
+				messageList.appendChild(messageElement);
+				messageList.scrollTop = messageList.scrollHeight;
 			});
 		};
+
 		stompClient.onStompError = function (frame) {
 			console.error('error');
 		};
+
 		stompClient.activate();
 	}
 
@@ -181,24 +190,16 @@
 	async function searchForUser(){
 		try {
 			const response = await fetch(`/accounts/search/${encodeURIComponent(search.value)}`);
+
 			if (response.ok){
 				const accounts = await response.json(); // JSON list of accounts containing matching values
 				if (accounts.length > 0) {
 					clearSearchResults();
 					search.style.borderRadius = "7px 7px 0px 0px";
-
-					for (var i = 0; i < accounts.length; i++) {
-						const resultElement = document.createElement("div");
-						let style = 'result'; // Pick appropriate styling
-						if (i == accounts.length - 1){
-							style = 'result result--final';
-						}
-						resultElement.innerHTML = `
-							<button class="${style}" value="${accounts[i].id}" onclick="createConversation(this)">
-								${accounts[i].username}
-							</button>
-						`;
-						results.appendChild(resultElement);
+					for (let i = 0; i < accounts.length; i++) {
+						let style = (i == accounts.length - 1) ? 'result result--final' : 'result'; // Pick appropriate styling
+						const result = buildHTML('div', {className: style, onclick: () => {createConversation(accounts[i].id)} }, createText(accounts[i].username));
+						results.appendChild(result);
 					}
 				}
 			} else {
@@ -210,25 +211,29 @@
 		}
 	}
 
-	async function createConversation(element) {
-		if (currentUserId == element.value){
-			return;
+	// Create a new conversation
+	async function createConversation(id) {
+		if (currentUserId == id) { 
+			return; // Return if user selected is oneself
 		}
-		try {
-			const accountIds = [element.value];
 
-			const response = await fetch(`/conversation`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-Requested-With': 'XMLHttpRequest'
-			},
-			body: JSON.stringify(accountIds)
-			}).then(response => response.text())
-				.then(htmlSnippet => {
-					document.getElementById('conversation-list').innerHTML = htmlSnippet;})
-				.catch(error => console.error("No response"));
-			clearSearchResults();
+		try {
+			const accountIds = [id];
+
+			const response = await fetch(`/conversation`, 
+			{
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify(accountIds)
+			});
+
+			if (response.ok){
+				const html = await response.text();
+				document.getElementById('conversation-list').innerHTML = html;
+				clearSearchResults();
+			} else {
+				console.log("No response");
+			}
 		}
 		catch (error) {
 			console.error(error);
@@ -239,6 +244,7 @@
 	async function fetchCurrentUserId(){
 		try {
 			const response = await fetch('/accounts/me');
+
 			if (response.ok){
 				const userData = await response.json();
 				currentUserId = userData;
@@ -255,7 +261,7 @@
 	function buildHTML (tag, attributes, ...children) {
 		const node = document.createElement(tag);
 		if (attributes){
-			for(const [key, value] of Object.entries(attributes)) {
+			for (const [key, value] of Object.entries(attributes)) {
 				if (key == 'style') {
 					node.style.cssText = value;
 				} else {

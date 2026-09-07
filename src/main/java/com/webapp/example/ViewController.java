@@ -1,5 +1,6 @@
 package com.webapp.example;
 
+import com.webapp.example.Errors.AccountNotFoundException;
 import com.webapp.example.account.Account;
 import com.webapp.example.account.AccountService;
 import com.webapp.example.account.LoginRequest;
@@ -93,15 +94,19 @@ public class ViewController {
       @AuthenticationPrincipal UserPrincipal principal) {
 
     List<Account> accounts = new ArrayList<Account>();
-    accounts.add(accountService.findByUsername(principal.getUsername()));
+    Account requester = accountService.findByUsername(principal.getUsername());
+    accounts.add(requester);
     for (int i = 0; i < accountIds.size(); i++) {
+      try {
+        if (accountService.findById(accountIds.get(i)).id() == requester.id()) return "homepage :: conversationList";
+      } catch (AccountNotFoundException e) {
+        return "homepage :: conversationList";
+      }
       accounts.add(accountService.findById(accountIds.get(i)));
     }
     conversationService.createConversation(accounts);
-
     model.addAttribute(
         "conversations", conversationService.getMyConversations(principal.getAccount()));
-
     return "homepage :: conversationList";
   }
 
