@@ -8,64 +8,63 @@
 	<body>
 		<div class="color" style="width: 100%; height:100%; display: flex; flex-direction: column; overflow: hidden;">
 			
-			<header>
-				<div style="width: 100px; min-height: 10vh; flex: 1; text-align: center; align-content: center;">
-				</div>
-				<div style="width: 100px; min-height: 10vh; flex: 1;text-align: center; align-content: center;">
-				</div>
-				<div style="width: 100px; min-height: 10vh; flex: 1; text-align: center; align-content: center;">
-					<div id="search-container" style="justify-content:center; margin-right: 17px; display: flex; flex-direction: row; align-items: center; gap: 5px;">
-						<div style="display: flex; flex-direction: column; max-width: 300px;  position: relative; min-width: 50px;">
-							<input type="search" id="search" placeholder="Search">
-							<div class="results" id="results"></div>
-						</div>
-						<button class="neon-box" onclick="searchForUser()" style="width: 40px; height:40px; min-width: 40px; min-height: 40px; margin-left: 5px;">
-							<svg class="search" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
-						</button>
-					</div>
-				</div>
-			</header>
-			<div style="width:80vw; align-self: center; flex: 1;">
-				<div style="display: flex; height: 100%;">
-					<!-- Conversations lists -->
-					<div style="flex: 2;">
-						<div id="conversations-column" style="flex-grow: 1; overflow-y: auto;">
-							<div th:fragment="conversationList" th:each="conversation : ${conversations}" style="padding: 7px;">
-								<button class="neon-box" onclick="fetchMessages(this)" th:data-id="${conversation.id}">
-									<div style="color: #fff;" th:text="${conversation.title}"></div>
+            <div class="chat-grid">
+
+                <div class="header-1"></div>
+                <div class="header-2">
+                    <div id="search-container" class="search-container">
+                        <div class="search-input">
+                            <input type="search" id="search" placeholder="Search">
+                            <div class="results" id="results"></div>
+                        </div>
+                        <button class="neon-box" onclick="searchForUser()" style="width: 40px; height:40px; min-width: 40px; min-height: 40px; margin-left: 5px;">
+                            <svg class="search" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="header-3"></div>
+
+                <div class="conversations" style="padding: 10px;">
+                    <div style="max-height: 100%; overflow-y: auto; padding: 10px;">
+						<div th:fragment="conversationList">
+							<div th:each="conversation : ${conversations}" id="conversation-list">
+								<button class="neon-box" onclick="fetchMessages(this)" th:data-id="${conversation.id}" style="margin-bottom: 10px;">
+									<div style="color: #fff;" th:text="${conversation.title}">Title</div>
 									<div style="color: #ccc; font-size: smaller;" th:text="${#temporals.format(conversation.lastSent, 'dd/MM/yy hh:mm a')}">
-									</div>
+									Timestamp</div>
 								</button>
 							</div>
 						</div>
-					</div>
-					<!-- Messages -->
-					<div style="border: 2px solid rgba(40,40,40,.2); flex: 4; display: flex; gap:5px; flex-direction: column; padding: 20px; justify-content: space-between;">
-						<div id="message-column" style="flex-grow: 1; overflow-y: auto; height: 0px; ">
-							<div th:fragment="messageList" th:each="message : ${messages}" th:data-id="${message.id}" style="margin-right: 5px;">
+                    </div>
+                </div>
+
+                <div class="chat" style="padding: 10px;">
+					<div style="height: 100%; overflow-y: auto; padding: 10px;">
+						<div th:fragment="messageList" id="message-list">
+							<div th:if="${messages == null}">
+								<p style="color: #fff; font-size: small; text-align: center;">Select a conversation</p>
+							</div>
+							<div th:each="message : ${messages}" th:data-id="${message.id}">
 								<div style="color: #fff" class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
 									<small th:text="${#temporals.format(message.sentAt, 'dd/MM/yy, hh:mm a')}"></small>
 								</div>
 								<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--out' : 'message--in'">
+									<div th:if="${message.accountId == currentUserId}" class="message-update"></div>
 									<span th:text="${message.contents}"></span>
 								</div>
 							</div>
-							<div th:if="${messages == null}">
-								<p style="color: #fff; font-size: small; text-align: center;">Select a conversation</p>
-							</div>
 						</div>
-						<form id="message-form" method="post"
-								style="width: 100%; align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center;">
-							<input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block; min-height: 0px;">
-							<input class="neon-box" type="submit" style="width: 30%; min-height: 0px; min-width: 50px; max-width: 100px;" value="Send">
-						</form>
 					</div>
-					<!-- WIP -->
-					<div style="flex: 1;">
-					</div>
-				</div>
-			</div>
-		</div>
+                    <form id="message-form" method="post"
+                            style="width: 100%; align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center; gap: 10px;">
+                        <input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block; min-height: 0px;">
+                        <input class="neon-box" type="submit" style="width: 30%; min-height: 0px; min-width: 50px; max-width: 100px;" value="Send">
+                    </form>
+                </div>
+
+                <div class="send">a</div>
+
+            </div>
 	</body>
 </html>
 
@@ -129,7 +128,7 @@
 		fetch(`/conversation/${conversationId}/messages`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
 			.then(response => response.text())
 			.then(htmlSnippet => {
-				document.getElementById('message-column').innerHTML = htmlSnippet;
+				document.getElementById('message-list').innerHTML = htmlSnippet;
 				history.pushState({ id: conversationId }, '', `/conversation/${conversationId}/messages`);
 			})
 			.catch(error => console.error("No response"));
@@ -157,7 +156,7 @@
 		stompClient.onConnect = function (frame) {
 			subscription = stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
 				const parsedMessage = JSON.parse(message.body);
-				const messageContainer = document.getElementById("message-column");
+				const messageContainer = document.getElementById('message-list');
 				const isMe = (parsedMessage.accountId == currentUserId);
 				const messageClass = isMe ? 'message--out' : 'message--in';
 				const timeClass = isMe ? 'time--out' : 'time--in';
@@ -166,8 +165,7 @@
 					buildHTML('div', { className: `message-time ${timeClass}` }, 
 						buildHTML('small', { style: "color: #fff" }, createText(time))),
 					buildHTML('div', { className: `message ${messageClass}` }, 
-						buildHTML('span', null, createText(parsedMessage.contents))),
-						buildHTML('div', null, createText("TEST"))
+						buildHTML('span', null, createText(parsedMessage.contents)))
 					)
 				messageContainer.appendChild(messageElement);
 				messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -228,10 +226,9 @@
 			body: JSON.stringify(accountIds)
 			}).then(response => response.text())
 				.then(htmlSnippet => {
-					document.getElementById('conversations-column').innerHTML = htmlSnippet;})
+					document.getElementById('conversation-list').innerHTML = htmlSnippet;})
 				.catch(error => console.error("No response"));
 			clearSearchResults();
-
 		}
 		catch (error) {
 			console.error(error);

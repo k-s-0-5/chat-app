@@ -1,6 +1,5 @@
 /* ============ BASE ============ */
 
-
 body {
   margin: 0;
   width: 100vw;
@@ -20,7 +19,7 @@ header {
 }
 
 form {
-  background-color: rgba(40,40,40,.1);
+  background-color: rgba(40, 40, 40, 0.1);
 }
 
 .error-message {
@@ -35,7 +34,7 @@ form {
 }
 
 .eye {
-  position:absolute;
+  position: absolute;
   top: 50%;
   right: 0;
   transform: translate(-50%, -50%);
@@ -55,8 +54,9 @@ form {
   height: auto;
 }
 
-input, button {
-  background-color: rgba(182, 203, 225, .1);
+input,
+button {
+  background-color: rgba(182, 203, 225, 0.1);
   color: white;
 }
 
@@ -83,19 +83,19 @@ button {
   width: 100%;
   min-height: 25px;
   min-width: 50px;
-  white-space: nowrap;     
-  overflow: hidden;        
-  text-overflow: clip; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
   padding: 5px;
   border-radius: 10px;
 }
 
 input[type="search"] {
-  height:40px; 
-  width: 100%; 
-  border-radius: 7px; 
-  margin:0px; 
-  outline: none
+  height: 40px;
+  width: 100%;
+  border-radius: 7px;
+  margin: 0px;
+  outline: none;
 }
 
 ul {
@@ -115,7 +115,7 @@ li {
 }
 
 ::-webkit-scrollbar-track {
-  background-color: rgba(40,40,40,.1);
+  background-color: rgba(40, 40, 40, 0.1);
   border-radius: 5px;
 }
 
@@ -126,12 +126,216 @@ li {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, .1);
+  background: rgba(255, 255, 255, 0.1);
 }
-
 
 /* ============ COMPONENTS ============ */
 
+.chat-grid {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  > * {
+    min-height: 0px;
+  }
+  grid-template-rows: 0.5fr 2fr 0.5fr;
+  grid-template-columns: 0.5fr 1fr 1fr 1fr 0.5fr;
+  grid-template-areas:
+    "header-1 header-2 header-2 header-2 header-3"
+    ". conversations chat chat ."
+    ". conversations send send .";
+}
+
+.header-1,
+.header-2,
+.header-3 {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-bottom: solid 1px rgb(60, 60, 60);
+}
+
+.header-1 {
+  grid-area: header-1;
+  /* background-color: #d4a200; */
+  min-width: calc(100% / 3);
+}
+.header-2 {
+  grid-area: header-2;
+  /* background-color: #00d4b8; */
+  min-width: calc(100% / 3);
+}
+.header-3 {
+  /* background-color: #00d435; */
+  grid-area: header-3;
+  min-width: calc(100% / 3);
+}
+
+@media (max-width: 1000px) {
+  .chat-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "header-1 header-2 header-3"
+      "conversations chat chat"
+      "conversations send send";
+  }
+  .header-2 {
+    grid-area: header-3;
+  }
+  .header-3 {
+    grid-area: header-2;
+  }
+}
+
+/* ============ SEARCH ============ */
+
+.search-container {
+  justify-content: end;
+  width: 200px;
+  margin: 0px 40px 0px 40px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 1;
+  overflow-x: visible;
+}
+
+.search-input {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-width: 40px;
+}
+
+.search-button {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  margin-left: 5px;
+}
+
+@media (max-width: 600px) {
+  .chat-grid {
+    grid-template-areas:
+      "header-1 header-3 header-3"
+      "conversations chat chat"
+      "conversations send send";
+  }
+  .header-1 {
+    min-width: 50vw;
+  }
+  .search-container {
+    margin: 0px 10px 0px 10px;
+  }
+}
+
+.results {
+  position: absolute;
+  inset: 0;
+  translate: 0px 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.result {
+  text-overflow: ellipsis;
+  max-width: 300px;
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 0px;
+  background-color: rgba(16, 18, 20, 1);
+}
+
+.result:hover {
+  background-color: rgba(24, 27, 30, 1);
+}
+
+.result--final {
+  border-radius: 0px 0px 7px 7px;
+}
+
+/* ============ CONVERSATIONS ============ */
+
+.conversations {
+  grid-area: conversations;
+  border-right: solid 1px rgb(60, 60, 60);
+  /* background-color: #107ee6; */
+}
+
+/* ============ MESSAGES ============ */
+
+.chat {
+  grid-area: chat;
+  /* background-color: #ff005e; */
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
+  padding: 20px;
+  justify-content: space-between;
+}
+
+.send-wrapper {
+  width: 100%;
+  align-content: space-between;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-radius: 10px;
+  justify-self: center;
+}
+
+.send {
+  grid-area: send;
+  /* background-color: aquamarine; */
+}
+
+/* https://stackoverflow.com/questions/32208665/fit-width-of-div-tightly-to-multi-line-span */
+.message {
+  position: relative;
+  border-radius: 10px;
+  font-weight: 500;
+  max-width: 70%;
+  padding: 7px;
+  word-break: break-all;
+  width: fit-content;
+}
+
+.message-update{
+  transform: translate(-75%, 85%); 
+  width: 20px;
+  height: 20px; 
+  position:absolute; 
+  background-color: #ffffff; 
+  border-radius: 100%;
+  text-align: center;
+}
+
+.message--in {
+  background-color: #eeeeee;
+  color: rgb(40, 40, 40);
+}
+
+.message--out {
+  background-color: #107ee6;
+  color: white;
+  justify-self: end;
+}
+
+.time {
+  text-wrap: nowrap;
+}
+
+.time--in {
+  justify-self: start;
+}
+
+.time--out {
+  justify-self: end;
+}
+
+/* ============ LOGIN CARD ============ */
 
 .card {
   border-radius: 15px;
@@ -164,7 +368,8 @@ input::placeholder {
   font-weight: 500;
 }
 
-.selected-box, .neon-box:hover {
+.selected-box,
+.neon-box:hover {
   box-shadow:
     0 0 3px white,
     0 0 15px #ff005e;
@@ -184,73 +389,11 @@ input::placeholder {
   animation: glow 1.5s infinite alternate;
 }
 
-/* https://stackoverflow.com/questions/32208665/fit-width-of-div-tightly-to-multi-line-span */
-.message {
-  border-radius: 10px;
-  font-weight: 500;
-  max-width: 80%;
-  padding: 7px; 
-  word-break:break-all;
-  width: fit-content;
-}
-
-.message--in {
-  background-color: #eeeeee;
-  color:rgb(40, 40, 40);
-}
-
-.message--out {
-  background-color: #107ee6;
-  color: white;
-  justify-self: end;
-}
-
-.time {
-  text-wrap: nowrap; 
-}
-
-.time--in {
-  justify-self: start;
-}
-
-.time--out {
-  justify-self: end;
-}
-
-.results {
-  position:absolute; 
-  inset:0; 
-  translate: 0px 100%; 
-  display: flex; 
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.result{
-  text-overflow: ellipsis; 
-  max-width: 300px; 
-  color: #ffffff; 
-  padding:12px; 
-  border-radius: 0px;
-  background-color: rgba(16, 18, 20, 1);
-}
-
-.result:hover{
-  background-color: rgba(24, 27, 30, 1);
-}
-
-.result--final{
-  border-radius: 0px 0px 7px 7px;
-}
-
-
 /* ============ UTILITIES ============ */
-
 
 .color {
   background: radial-gradient(circle, rgb(0, 5, 20) 0%, rgba(0, 0, 0, 1) 100%);
 }
-
 
 /* ============ ANIMATIONS ============ */
 
@@ -259,21 +402,21 @@ input::placeholder {
     text-shadow:
       0 0 10px #ff005e,
       0 0 20px #ff005e,
-      0 0 50px #ff005e;
+      0 0 40px #ff005e;
   }
   100% {
     text-shadow:
       0 0 10px #00d435,
       0 0 20px #00d435,
-      0 0 50px #00d435;
+      0 0 40px #00d435;
   }
 }
 
 @keyframes box-glow {
   0% {
-    box-shadow: 0 0 15px #ff005e;
+    box-shadow: 0 0 5px #ff005e;
   }
   100% {
-    box-shadow: 0 0 15px #00d435;
+    box-shadow: 0 0 5px #00d435;
   }
 }

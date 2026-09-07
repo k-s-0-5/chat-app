@@ -73,8 +73,7 @@ public class ViewController {
       return "redirect:/home";
     }
 
-    List<Message> messages = messageService.findByConversationId(conversationId);
-    model.addAttribute("messages", messages);
+    model.addAttribute("messages", messageService.findByConversationId(conversationId));
     model.addAttribute("currentUserId", principal.getId());
 
     String requestedWith = request.getHeader("X-Requested-With");
