@@ -3,7 +3,6 @@ package com.webapp.example.account;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -66,6 +65,23 @@ public class AccountRepository {
             """)
         .param("username", username)
         .query(Account.class)
+        .optional();
+  }
+
+  /**
+   * Retrieves account id where account.username == username
+   *
+   * @param username
+   * @return Optional of account id
+   */
+  public Optional<UUID> findIdByUsername(String username) {
+    return jdbcClient
+        .sql(
+            """
+            SELECT id FROM Account WHERE username = :username
+            """)
+        .param("username", username)
+        .query(UUID.class)
         .optional();
   }
 

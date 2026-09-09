@@ -7,7 +7,6 @@ import com.webapp.example.account.LoginRequest;
 import com.webapp.example.account.SignupRequest;
 import com.webapp.example.auth.UserPrincipal;
 import com.webapp.example.conversation.ConversationService;
-import com.webapp.example.message.Message;
 import com.webapp.example.message.MessageService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

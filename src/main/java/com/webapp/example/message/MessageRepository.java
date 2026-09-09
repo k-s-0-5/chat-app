@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -68,7 +70,8 @@ public class MessageRepository {
    *
    * @param message
    */
-  public void create(Message message) {
+  public Message create(Message message) {
+    KeyHolder keyHolder = new GeneratedKeyHolder();
     jdbcClient
         .sql(
             """
@@ -85,7 +88,10 @@ public class MessageRepository {
             message.contents(),
             message.edited()
             )
-        .update();
+        .update(keyHolder);
+
+      Long id = keyHolder.getKey().longValue();
+      return new Message(id, message.accountId(), message.conversationId(), message.sentAt(), message.contents(), message.edited());
   }
 
   /**
@@ -94,24 +100,22 @@ public class MessageRepository {
    * @param message
    * @param id
    */
-  public void update(Message updatedMessage, long id) {
+  public Message update(Message message) {
+    KeyHolder keyHolder = new GeneratedKeyHolder();
     jdbcClient
         .sql(
             """
             UPDATE Message set
-            account_id = ?, conversation_id = ?,
-            sent_at = ?, contents = ?, 
-            edited = ? WHERE id = ?)
+            contents = ?, edited = ? 
+            WHERE id = ? AND account_id = ?
             """)
         .params(
             List.of(
-                updatedMessage.accountId(),
-                updatedMessage.conversationId(),
-                updatedMessage.sentAt(),
-                updatedMessage.contents(),
-                updatedMessage.edited(),
-                id))
-        .update();
+                message.contents(), true,
+                message.id(), message.accountId()))
+        .update(keyHolder);
+      Long id = keyHolder.getKey().longValue();
+      return new Message(id, message.accountId(), message.conversationId(), message.sentAt(), message.contents(), message.edited());
   }
 
   /**
@@ -119,13 +123,14 @@ public class MessageRepository {
    *
    * @param id
    */
-  public void delete(long id) {
-    jdbcClient
+  public int delete(long id, UUID accountId) {
+    return jdbcClient
         .sql(
             """
-            DELETE FROM Message WHERE id = :id
+            DELETE FROM Message WHERE id = ? AND account_id = ?
             """)
-        .param("id", id)
+        .params(
+            List.of(id, accountId))
         .update();
   }
 

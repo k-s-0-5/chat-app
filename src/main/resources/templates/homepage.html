@@ -26,8 +26,8 @@
 
                 <div class="conversations" style="padding: 10px;">
                     <div style="max-height: 100%; overflow-y: auto; padding: 10px;">
-						<div th:fragment="conversationList">
-							<div th:each="conversation : ${conversations}" id="conversation-list">
+						<div th:fragment="conversationList" id="conversation-list">
+							<div th:each="conversation : ${conversations}">
 								<button class="neon-box" onclick="fetchMessages(this)" th:data-id="${conversation.id}" style="margin-bottom: 10px;">
 									<div style="color: #fff;" th:text="${conversation.title}">Title</div>
 									<div style="color: #ccc; font-size: smaller;" th:text="${#temporals.format(conversation.lastSent, 'dd/MM/yy hh:mm a')}">
@@ -44,15 +44,22 @@
 							<div th:if="${messages == null}">
 								<p style="color: #fff; font-size: small; text-align: center;">Select a conversation</p>
 							</div>
-							<div th:each="message : ${messages}" th:data-id="${message.id}">
-								<div style="color: #fff" class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
-									<small th:text="${#temporals.format(message.sentAt, 'dd/MM/yy, hh:mm a')}"></small>
+								<div th:each="message : ${messages}" th:data-id="${message.id}" class="message-wrapper">
+									<div style="color: #fff" class="message-time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
+										<small th:text="${#temporals.format(message.sentAt, 'dd/MM/yy, hh:mm a') + (message.edited ? ' edited' : '')}"></small>
+									</div>
+									<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--out' : 'message--in'">
+										<a th:if="${message.accountId == currentUserId}" class="edit-message" onclick="editMessage(this)">
+											<svg viewBox="0 0 24 24" fill="none">
+												<path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+												</path>
+												<path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">														
+												</path> 
+											</svg>
+										</a>
+										<span th:text="${message.contents}"></span>
+									</div>
 								</div>
-								<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--out' : 'message--in'">
-									<a th:if="${message.accountId == currentUserId}" class="message-update"></a>
-									<span th:text="${message.contents}"></span>
-								</div>
-							</div>
 						</div>
 					</div>
                     <form id="message-form" method="post"
@@ -73,17 +80,66 @@
 	let subscription = null;
 	let stompClient = null;
 	let currentUserId = null;
+	const editIcon = `<svg viewBox="0 0 24 24" fill="none">
+							<path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+							</path>
+							<path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">														
+							</path> 
+						</svg>`
 	const results = document.getElementById("results");
 	const excludedDiv = document.getElementById('search-container');
 	const search = document.getElementById("search");
 	const messageList = document.getElementById('message-list');
 
+	function editMessage(element) {
+		const currentMessage = element.closest('.message--out');
+		const childElements = [...currentMessage.children];
+		const messageId = currentMessage.closest('.message-wrapper').dataset.id
+		const button = currentMessage.querySelector('a');
+		const html = buildHTML("form", { method:"post" }, buildHTML("input", { type:"text", id:"message", value: currentMessage.querySelector('span').textContent} ));
+
+		const submitMessageUpdate = (event) => {
+			event.preventDefault();
+			if (!html.firstChild.value) { // Delete clause
+				const message = messageId;
+				stompClient.publish({
+					destination: "/ws/messages.delete",
+					body: JSON.stringify(messageId)
+				});
+			} 
+			else { // Update clause
+				const message = {
+					id: messageId,
+					contents: html.firstChild.value,
+				};
+				stompClient.publish({
+					destination: "/ws/messages.edit",
+					body: JSON.stringify(message)
+				});
+			}
+			document.removeEventListener('submit', submitMessageUpdate);
+		};
+		html.addEventListener('submit', submitMessageUpdate);
+
+		const restoreMessage = (event) => {
+			if (!html.contains(event.target) && !button.contains(event.target)) {
+				currentMessage.replaceChildren(...childElements);
+				document.removeEventListener('click', restoreMessage);
+			}
+		};
+		document.addEventListener('click', restoreMessage);
+
+		currentMessage.replaceChildren(html);
+
+	}
+
 	// Listeners
 	// Message submit listener
 	document.getElementById("message-form")
-    .addEventListener("submit", async e => {
-		e.preventDefault();
+    .addEventListener("submit", async (event) => {
+		event.preventDefault();
 		const message = {
+			accountId: currentUserId,
 			conversationId: conversationId,
 			contents: document.getElementById("message-input").value
 		};
@@ -107,7 +163,7 @@
     	currentUserId = await fetchCurrentUserId();
 		const conversation = window.location.pathname.match(/\/conversation\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/messages/);
 		if (conversation){
-			fetchMessages(null, document.querySelector(`[data-id="${conversation[1]}"]`));
+			fetchMessages(document.querySelector(`[data-id="${conversation[1]}"]`));
 		}
 	});
 
@@ -164,18 +220,15 @@
 		stompClient.onConnect = function (frame) {
 			subscription = stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
 				const parsedMessage = JSON.parse(message.body);
-				const isMe = (parsedMessage.accountId == currentUserId);
-				const messageClass = isMe ? 'message--out' : 'message--in';
-				const timeClass = isMe ? 'time--out' : 'time--in';
-				const time = getFormattedTime(parsedMessage.sentAt);
-				const messageElement = buildHTML('div', { style: "margin-right: 5px;" },
-					buildHTML('div', { className: `message-time ${timeClass}` }, 
-						buildHTML('small', { style: "color: #fff" }, createText(time))),
-					buildHTML('div', { className: `message ${messageClass}` }, 
-						buildHTML('span', null, createText(parsedMessage.contents)))
-					)
-				messageList.appendChild(messageElement);
-				messageList.scrollTop = messageList.scrollHeight;
+				if (parsedMessage.event == "send") {
+					messageList.appendChild(buildMessage(parsedMessage));
+					messageList.scrollTop = messageList.scrollHeight;
+				} else if (parsedMessage.event == "edit") {
+					document.querySelector(`[data-id="${parsedMessage.body.id}"]`).replaceChildren(buildMessage(parsedMessage));
+				} else if (parsedMessage.event == "delete") {
+					console.log(parsedMessage.body + " DELETE");
+					document.querySelector(`[data-id="${parsedMessage.body}"]`).remove();
+				}
 			});
 		};
 
@@ -184,6 +237,23 @@
 		};
 
 		stompClient.activate();
+	}
+
+	function buildMessage(parsedMessage){
+		const isMe = (parsedMessage.body.accountId == currentUserId);
+		const messageClass = isMe ? 'message--out' : 'message--in';
+		const timeClass = isMe ? 'time--out' : 'time--in';
+		const time = getFormattedTime(parsedMessage.body.sentAt);
+		const button = buildHTML('a', { className: "edit-message", onclick: function(event) { editMessage(event.target); } });
+		button.innerHTML = editIcon;
+		const message = buildHTML('div', { className: "message-wrapper", 'data-id': parsedMessage.body.id },
+				buildHTML('div', { className: `message-time ${timeClass}` }, 
+					buildHTML('small', { style: "color: #fff" }, createText(time + (parsedMessage.body.edited ? ' edited' : '')))),
+				buildHTML('div', { className: `message ${messageClass}` }, 
+					button,
+					buildHTML('span', null, createText(parsedMessage.body.contents)))
+			)
+		return message;
 	}
 
 	// Finds users whose username contains the search entry and appends results to search results
@@ -198,7 +268,7 @@
 					search.style.borderRadius = "7px 7px 0px 0px";
 					for (let i = 0; i < accounts.length; i++) {
 						let style = (i == accounts.length - 1) ? 'result result--final' : 'result'; // Pick appropriate styling
-						const result = buildHTML('div', {className: style, onclick: () => {createConversation(accounts[i].id)} }, createText(accounts[i].username));
+						const result = buildHTML('div', {className: style, onclick: () => createConversation(accounts[i].id) }, createText(accounts[i].username));
 						results.appendChild(result);
 					}
 				}
@@ -246,9 +316,9 @@
 			const response = await fetch('/accounts/me');
 
 			if (response.ok){
-				const userData = await response.json();
-				currentUserId = userData;
-				return userData;
+				const userId = await response.json();
+				currentUserId = userId;
+				return userId;
 			} else {
 				console.log("No response");
 			}
@@ -265,7 +335,11 @@
 				if (key == 'style') {
 					node.style.cssText = value;
 				} else {
-					node[key] = value;
+					if (key.includes('-')) {
+      					node.setAttribute(key, value);
+					} else {
+						node[key] = value;
+					}
 				}
 			}
 		}

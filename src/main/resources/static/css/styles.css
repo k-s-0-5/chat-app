@@ -297,21 +297,28 @@ li {
   border-radius: 10px;
   font-weight: 500;
   max-width: 70%;
+  min-height: 1em;
   padding: 7px;
   word-break: break-all;
   width: fit-content;
 }
 
-.message-update{
-  transform: translate(-75%, 90%); 
-  width: 20px;
-  height: 20px; 
+.edit-message{
+  transform: translate(-100%, -0%); 
+  padding: 7px;
+  height: 1em;
+  width: 1em;
+  min-height: 1em;
+  min-width: 1em;
   position:absolute; 
-  background-color: #ffffff; 
+  font-weight: 500;
+  background-color: #e7e7e7; 
   border-radius: 100%;
   text-align: center;
+  justify-self: center;
+  align-self: center;
 }
-.message-update:hover{
+.edit-message:hover{
   background-color: #ccc; 
 }
 

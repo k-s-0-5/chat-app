@@ -31,6 +31,10 @@ public class AccountService {
     return accountRepository.findByUsername(username).orElseThrow(() -> new AccountNotFoundException(username));
   }
 
+  public UUID findIdByUsername(String username) {
+    return accountRepository.findIdByUsername(username).orElseThrow(() -> new AccountNotFoundException(username));
+  }
+
   public Account findById(UUID id) {
     return accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
   }
