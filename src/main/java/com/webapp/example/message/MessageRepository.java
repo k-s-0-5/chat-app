@@ -95,7 +95,7 @@ public class MessageRepository {
   }
 
   /**
-   * Updates message where message.id = id message.accountId = originalMessage.accountId
+   * Updates message where message.id = id and message.accountId = originalMessage.accountId
    *
    * @param message
    * @param id
