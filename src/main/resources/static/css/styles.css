@@ -157,16 +157,13 @@ li {
 
 .header-1 {
   grid-area: header-1;
-  /* background-color: #d4a200; */
   min-width: calc(100% / 3);
 }
 .header-2 {
   grid-area: header-2;
-  /* background-color: #00d4b8; */
   min-width: calc(100% / 3);
 }
 .header-3 {
-  /* background-color: #00d435; */
   grid-area: header-3;
   min-width: calc(100% / 3);
 }
@@ -261,14 +258,12 @@ li {
 .conversations {
   grid-area: conversations;
   border-right: solid 1px rgb(60, 60, 60);
-  /* background-color: #107ee6; */
 }
 
 /* ============ MESSAGES ============ */
 
 .chat {
   grid-area: chat;
-  /* background-color: #ff005e; */
   display: flex;
   gap: 5px;
   flex-direction: column;
@@ -288,11 +283,11 @@ li {
 
 .send {
   grid-area: send;
-  /* background-color: aquamarine; */
 }
 
 /* https://stackoverflow.com/questions/32208665/fit-width-of-div-tightly-to-multi-line-span */
 .message {
+  display: flex;
   position: relative;
   border-radius: 10px;
   font-weight: 500;
@@ -302,47 +297,46 @@ li {
   word-break: break-all;
   width: fit-content;
 }
+.message--in {
+  background-color: #eeeeee;
+  color: rgb(40, 40, 40);
+  justify-self: flex-start;
+}
+.message--out {
+  background-color: #107ee6;
+  margin-left: auto;
+  color: white;
+  justify-self: flex-end;
+}
 
 .edit-message{
-  transform: translate(-100%, -0%); 
+  transform: translate(-150%, 0%); 
   padding: 7px;
   height: 1em;
   width: 1em;
-  min-height: 1em;
-  min-width: 1em;
   position:absolute; 
   font-weight: 500;
   background-color: #e7e7e7; 
   border-radius: 100%;
-  text-align: center;
-  justify-self: center;
   align-self: center;
 }
 .edit-message:hover{
   background-color: #ccc; 
 }
 
-.message--in {
-  background-color: #eeeeee;
-  color: rgb(40, 40, 40);
-}
-
-.message--out {
-  background-color: #107ee6;
-  color: white;
-  justify-self: end;
-}
-
 .time {
+  display: flex;
+  color: #fff;
+  width: min-content;
   text-wrap: nowrap;
 }
-
 .time--in {
   justify-self: start;
+  margin-right: auto;
 }
-
 .time--out {
   justify-self: end;
+  margin-left: auto;
 }
 
 /* ============ LOGIN CARD ============ */
