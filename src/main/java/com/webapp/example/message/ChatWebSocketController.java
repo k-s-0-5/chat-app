@@ -8,7 +8,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
-import com.webapp.example.account.AccountService;
+import jakarta.validation.Valid;
 
 @Controller
 public class ChatWebSocketController {
@@ -24,15 +24,15 @@ public class ChatWebSocketController {
   // Important note, SecurityContextHolder is a thread-local utility meaning it does not work
   // with WebSockets, principals do work however
   @MessageMapping("/messages.send")
-  public void sendMessage(Message message, Principal principal) {
-    Message created = messageService.createMessage(message, principal.getName());
+  public void sendMessage(@Valid MessageCreateRequest messageCreateRequest, Principal principal) {
+    Message created = messageService.createMessage(messageCreateRequest, principal.getName());
     messagingTemplate.convertAndSend(
         "/topic/messages." + created.conversationId(), Map.of("event", "send", "body", created));
   }
 
   @MessageMapping("/messages.edit")
-  public void editMessage(Message message, Principal principal) {
-    Message edited = messageService.editMessage(message, principal.getName());
+  public void editMessage(@Valid MessageUpdateRequest messageUpdateRequest, Principal principal) {
+    Message edited = messageService.editMessage(messageUpdateRequest, principal.getName());
     messagingTemplate.convertAndSend(
         "/topic/messages." + edited.conversationId(), Map.of("event", "edit", "body", edited));
   }

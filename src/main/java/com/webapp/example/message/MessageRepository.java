@@ -1,5 +1,6 @@
 package com.webapp.example.message;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,7 +71,7 @@ public class MessageRepository {
    *
    * @param message
    */
-  public Message create(Message message) {
+  public Message create(MessageCreateRequest messageCreateRequest, UUID accountId) {
     KeyHolder keyHolder = new GeneratedKeyHolder();
     jdbcClient
         .sql(
@@ -82,26 +83,24 @@ public class MessageRepository {
             values(?, ?, ?, ?, ?)
             """)
         .params(
-            message.accountId(),
-            message.conversationId(),
-            message.sentAt(),
-            message.contents(),
-            message.edited()
+            accountId,
+            messageCreateRequest.conversationId(),
+            LocalDateTime.now(),
+            messageCreateRequest.contents(),
+            false
             )
         .update(keyHolder);
-
       Long id = keyHolder.getKey().longValue();
-      return new Message(id, message.accountId(), message.conversationId(), message.sentAt(), message.contents(), message.edited());
+      return new Message(id, accountId, messageCreateRequest.conversationId(), LocalDateTime.now(), messageCreateRequest.contents(), false);
   }
 
   /**
-   * Replaces message where message.id = id with updatedMessage
+   * Updates message where message.id = id message.accountId = originalMessage.accountId
    *
    * @param message
    * @param id
    */
-  public Message update(Message message) {
-    KeyHolder keyHolder = new GeneratedKeyHolder();
+  public Message update(Message message, String content) {
     jdbcClient
         .sql(
             """
@@ -111,11 +110,10 @@ public class MessageRepository {
             """)
         .params(
             List.of(
-                message.contents(), true,
+                content, true,
                 message.id(), message.accountId()))
-        .update(keyHolder);
-      Long id = keyHolder.getKey().longValue();
-      return new Message(id, message.accountId(), message.conversationId(), message.sentAt(), message.contents(), message.edited());
+        .update();
+      return new Message(message.id(), message.accountId(), message.conversationId(), message.sentAt(), content, true);
   }
 
   /**
@@ -149,6 +147,29 @@ public class MessageRepository {
    * @param messages
    */
   public void saveAll(List<Message> messages) {
-    messages.forEach(this::create);
+    messages.forEach(this::testCreate);
+  }
+
+  public Message testCreate(Message message) {
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+    jdbcClient
+        .sql(
+            """
+            INSERT INTO Message(
+            account_id, conversation_id, 
+            sent_at, contents, 
+            edited)
+            values(?, ?, ?, ?, ?)
+            """)
+        .params(
+            message.accountId(),
+            message.conversationId(),
+            message.sentAt(),
+            message.contents(),
+            false
+            )
+        .update(keyHolder);
+      Long id = keyHolder.getKey().longValue();
+      return new Message(id, message.accountId(),  message.conversationId(),  message.sentAt(),  message.contents(), false);
   }
 }

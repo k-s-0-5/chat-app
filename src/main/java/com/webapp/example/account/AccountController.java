@@ -38,7 +38,7 @@ public class AccountController {
    * @return returns a short list of accountDTOs
    */
   @GetMapping("/search/{usernameSegment}")
-  public List<AccountDTO> findByUsernameSegment(@PathVariable String usernameSegment) {
+  public List<AccountSearchRequest> findByUsernameSegment(@PathVariable String usernameSegment) {
     if (usernameSegment.isEmpty()) {
       return List.of();
     }

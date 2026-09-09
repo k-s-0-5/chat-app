@@ -3,7 +3,6 @@ package com.webapp.example.message;
 import com.webapp.example.Errors.MessageNotFoundException;
 import com.webapp.example.account.AccountService;
 import com.webapp.example.conversation.ConversationService;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -32,35 +31,17 @@ public class MessageService {
     return messageRepository.findById(id).orElseThrow(() -> new MessageNotFoundException(id));
   }
 
-  public Message createMessage(Message message, String username) {
+  public Message createMessage(MessageCreateRequest messageCreateRequest, String username) {
     UUID accountId = accountService.findIdByUsername(username);
-    if (!accountId.equals(message.accountId())
-        || !conversationService.isAccountInConversation(accountId, message.conversationId()))
-      return null;
-    Message fullMessage =
-        new Message(
-            -1,
-            accountId,
-            message.conversationId(),
-            LocalDateTime.now(),
-            message.contents(),
-            false);
-    return messageRepository.create(fullMessage);
+    if (!conversationService.isAccountInConversation(accountId, messageCreateRequest.conversationId())) return null;
+    return messageRepository.create(messageCreateRequest, accountId);
   }
 
-  public Message editMessage(Message message, String username) {
+  public Message editMessage(MessageUpdateRequest messageUpdateRequest, String username) {
     UUID accountId = accountService.findIdByUsername(username);
-    Message originalMessage = findById(message.id());
-    Message fullMessage =
-        new Message(
-            originalMessage.id(),
-            originalMessage.accountId(),
-            originalMessage.conversationId(),
-            originalMessage.sentAt(),
-            message.contents(),
-            true);
-    if (!accountId.equals(originalMessage.accountId())) return null;
-    return messageRepository.update(fullMessage);
+    Message original = findById(messageUpdateRequest.id());
+    if (!accountId.equals(original.accountId())) return null;
+    return messageRepository.update(original, messageUpdateRequest.contents());
   }
 
   public UUID deleteMessage(Long id, String username) {

@@ -42,10 +42,10 @@ class AccountControllerUnitTest {
   class FindBySegmentTests {
     @Test
     void testFindByUsernameSegment() {
-      List<AccountDTO> accounts =
+      List<AccountSearchRequest> accounts =
           List.of(
-              new AccountDTO(UUID.randomUUID(), "12345"),
-              new AccountDTO(UUID.randomUUID(), "52341"));
+              new AccountSearchRequest(UUID.randomUUID(), "12345"),
+              new AccountSearchRequest(UUID.randomUUID(), "52341"));
       when(accountRepository.findByUsernameSegment("234")).thenReturn(accounts);
       assertEquals(accounts, accountController.findByUsernameSegment("234"));
     }
@@ -53,10 +53,10 @@ class AccountControllerUnitTest {
     @Test
     void testFindByUsernameSegmentAPI() throws Exception {
       UserPrincipal principal = mock(UserPrincipal.class);
-      List<AccountDTO> accounts =
+      List<AccountSearchRequest> accounts =
           List.of(
-              new AccountDTO(UUID.randomUUID(), "12345"),
-              new AccountDTO(UUID.randomUUID(), "52341"));
+              new AccountSearchRequest(UUID.randomUUID(), "12345"),
+              new AccountSearchRequest(UUID.randomUUID(), "52341"));
       when(accountRepository.findByUsernameSegment("234")).thenReturn(accounts);      
       mockMvc.perform(get("/accounts/search/{usernameSegment}", 234).with(user(principal))).andExpect(status().isOk())
         .andExpect(jsonPath("$[0].username").value(accounts.get(0).username()))

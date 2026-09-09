@@ -46,9 +46,8 @@ public class Application {
           new Conversation(con1, "user1 & user2", LocalDateTime.parse("2026-04-25T10:01:00")));
       participationRepository.create(new Participant(1, acc1, con1, LocalDateTime.now(), "ADMIN"));
       participationRepository.create(new Participant(2, acc2, con1, LocalDateTime.now(), "USER"));
-      messageRepository.create(new Message((long)0, acc1, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hello there!", false));
-      messageRepository.create(new Message((long)1, acc2, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hi!", false));
-
+      messageRepository.testCreate(new Message((long)0, acc1, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hello there!", false));
+      messageRepository.testCreate(new Message((long)1, acc2, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hi!", false));
     };
   }
 }

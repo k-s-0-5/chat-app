@@ -129,7 +129,6 @@
     .addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const message = {
-			accountId: currentUserId,
 			conversationId: conversationId,
 			contents: document.getElementById("message-input").value
 		};
