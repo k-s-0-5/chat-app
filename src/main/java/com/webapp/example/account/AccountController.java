@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Rest controller for accounts */
@@ -32,16 +32,16 @@ public class AccountController {
   }
 
   /**
-   * Retrieves limited list of accountDTOs where the account's username contains the username segment
+   * Retrieves limited list of AccountSearchResults where the account's username contains the username segment
    *
    * @param usernameSegment
    * @return returns a short list of accountDTOs
    */
-  @GetMapping("/search/{usernameSegment}")
-  public List<AccountSearchRequest> findByUsernameSegment(@PathVariable String usernameSegment) {
-    if (usernameSegment.isEmpty()) {
+  @GetMapping("/search")
+  public List<AccountSearchResult> findByUsernameSegment(@AuthenticationPrincipal UserPrincipal principal, @RequestParam String username) {
+    if (username.isEmpty()) {
       return List.of();
     }
-    return accountRepository.findByUsernameSegment(usernameSegment);
+    return accountRepository.findByUsernameSegment(username, principal.getId());
   }
 }

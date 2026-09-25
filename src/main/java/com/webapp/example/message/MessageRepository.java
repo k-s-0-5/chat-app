@@ -1,10 +1,10 @@
 package com.webapp.example.message;
 
+import com.webapp.example.config.CryptoUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -18,9 +18,11 @@ import org.springframework.stereotype.Repository;
 public class MessageRepository {
 
   private final JdbcClient jdbcClient;
+  private final CryptoUtils cryptoUtils;
 
-  public MessageRepository(JdbcClient jdbcClient) {
+  public MessageRepository(JdbcClient jdbcClient, CryptoUtils cryptoUtils) {
     this.jdbcClient = jdbcClient;
+    this.cryptoUtils = cryptoUtils;
   }
 
   /**
@@ -50,26 +52,37 @@ public class MessageRepository {
   }
 
   /**
-   * Retrieves all messages within a conversation
+   * Retrieves messages within a conversation sent before timestamp capped at 20
    *
    * @param conversationId
-   * @return List of messages that with a conversationId == conversationId
+   * @param timestamp
+   * @return List of messages with a conversationId == conversationId
    */
-  public List<Message> findByConversationId(UUID conversationId) {
+  public List<Message> findByConversationId(UUID conversationId, LocalDateTime timestamp) {
     return jdbcClient
         .sql(
             """
-            SELECT * FROM Message WHERE conversation_id = :conversationId
+            SELECT * FROM Message WHERE conversation_id = ? AND sent_at < ? ORDER BY sent_at DESC LIMIT 20
             """)
-        .param("conversationId", conversationId)
-        .query(Message.class)
+        .params(conversationId, timestamp)
+        .query(
+            (rs, rowNumber) ->
+                new Message(
+                    rs.getLong("id"),
+                    UUID.fromString(rs.getString("account_id")),
+                    UUID.fromString(rs.getString("conversation_id")),
+                    rs.getTimestamp("sent_at").toLocalDateTime(),
+                    cryptoUtils.decrypt(rs.getString("contents")),
+                    rs.getBoolean("edited")))
         .list();
   }
 
+  //   https://learncodewithdurgesh.com/tutorials/spring-boot-tutorials/rowmapper-in-spring-jdbc
   /**
    * Adds a new message to the database
    *
-   * @param message
+   * @param messageCreateRequest
+   * @param accountId
    */
   public Message create(MessageCreateRequest messageCreateRequest, UUID accountId) {
     KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -77,8 +90,8 @@ public class MessageRepository {
         .sql(
             """
             INSERT INTO Message(
-            account_id, conversation_id, 
-            sent_at, contents, 
+            account_id, conversation_id,
+            sent_at, contents,
             edited)
             values(?, ?, ?, ?, ?)
             """)
@@ -87,39 +100,48 @@ public class MessageRepository {
             messageCreateRequest.conversationId(),
             LocalDateTime.now(),
             messageCreateRequest.contents(),
-            false
-            )
+            false)
         .update(keyHolder);
-      Long id = keyHolder.getKey().longValue();
-      return new Message(id, accountId, messageCreateRequest.conversationId(), LocalDateTime.now(), messageCreateRequest.contents(), false);
+    Long id = keyHolder.getKey().longValue();
+    return new Message(
+        id,
+        accountId,
+        messageCreateRequest.conversationId(),
+        LocalDateTime.now(),
+        cryptoUtils.encrypt(messageCreateRequest.contents()),
+        false);
   }
 
   /**
-   * Updates message where message.id = id and message.accountId = originalMessage.accountId
+   * Updates message's contents where message.id = originalMessage.id and message.accountId = originalMessage.accountId
    *
-   * @param message
-   * @param id
+   * @param originalMessage
+   * @param content
    */
-  public Message update(Message message, String content) {
+  public Message update(Message originalMessage, String content) {
     jdbcClient
         .sql(
             """
-            UPDATE Message set
-            contents = ?, edited = ? 
+            UPDATE Message SET
+            contents = ?, edited = ?
             WHERE id = ? AND account_id = ?
             """)
-        .params(
-            List.of(
-                content, true,
-                message.id(), message.accountId()))
+        .params(List.of(content, true, originalMessage.id(), originalMessage.accountId()))
         .update();
-      return new Message(message.id(), message.accountId(), message.conversationId(), message.sentAt(), content, true);
+    return new Message(
+        originalMessage.id(),
+        originalMessage.accountId(),
+        originalMessage.conversationId(),
+        originalMessage.sentAt(),
+        content,
+        true);
   }
 
   /**
-   * Deletes message where message.id = id
+   * Deletes message where message.id = id and message.accountId = accountId
    *
    * @param id
+   * @param accountId
    */
   public int delete(long id, UUID accountId) {
     return jdbcClient
@@ -127,8 +149,7 @@ public class MessageRepository {
             """
             DELETE FROM Message WHERE id = ? AND account_id = ?
             """)
-        .params(
-            List.of(id, accountId))
+        .params(List.of(id, accountId))
         .update();
   }
 
@@ -156,8 +177,8 @@ public class MessageRepository {
         .sql(
             """
             INSERT INTO Message(
-            account_id, conversation_id, 
-            sent_at, contents, 
+            account_id, conversation_id,
+            sent_at, contents,
             edited)
             values(?, ?, ?, ?, ?)
             """)
@@ -165,11 +186,16 @@ public class MessageRepository {
             message.accountId(),
             message.conversationId(),
             message.sentAt(),
-            message.contents(),
-            false
-            )
+            cryptoUtils.encrypt(message.contents()),
+            false)
         .update(keyHolder);
-      Long id = keyHolder.getKey().longValue();
-      return new Message(id, message.accountId(),  message.conversationId(),  message.sentAt(),  message.contents(), false);
+    Long id = keyHolder.getKey().longValue();
+    return new Message(
+        id,
+        message.accountId(),
+        message.conversationId(),
+        message.sentAt(),
+        message.contents(),
+        false);
   }
 }

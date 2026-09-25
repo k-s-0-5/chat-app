@@ -1,54 +1,60 @@
 package com.webapp.example.account;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.jdbc.core.simple.JdbcClient;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+// https://www.innoq.com/en/blog/2023/10/spring-boot-testing/@JdbcTest  
+@JdbcTest 
+@Import(AccountRepository.class)
+@DisplayName("Account Repository Tests")
 public class AccountRepositoryIntegrationTest {
 
-    private JdbcClient jdbcClient;
+    @Autowired private AccountRepository accountRepository;
 
-    @Test
-    void testCount() {
+    @MockitoBean private CommandLineRunner clr; // To avoid running the clr in Application.java
 
-    }
+    @Nested
+    @DisplayName("Account REST tests")
+    class FindBySegmentTests {
+        @Test
+        void testCreateAndFindById() {
+            UUID id = UUID.randomUUID();
+            Account a = new Account(id, "user1", "user1@example.com", "1", "ROLE_USER");
+            accountRepository.create(a);
+            Optional<Account> oa = accountRepository.findById(id);
+            assertTrue(oa.isPresent());
+            assertEquals(oa.get(), a);
+        }
 
-    @Test
-    void testCreate() {
+        @Test
+        void testDelete() {
+            UUID id = UUID.randomUUID();
+            Account a = new Account(id, "user1", "user1@example.com", "1", "ROLE_USER");
+            accountRepository.create(a);
+            int rowsAffected = accountRepository.delete(id);
+            assertEquals(rowsAffected, 1);
+        }
 
-    }
-
-    @Test
-    void testDelete() {
-
-    }
-
-    @Test
-    void testFindAll() {
-
-    }
-
-    @Test
-    void testFindById() {
-
-    }
-
-    @Test
-    void testFindByUsername() {
-
-    }
-
-    @Test
-    void testFindByUsernameSegment() {
-
-    }
-
-    @Test
-    void testSaveAll() {
-
-    }
-
-    @Test
-    void testUpdate() {
-
+        @Test
+        void testUpdate() {
+            UUID id = UUID.randomUUID();
+            Account a1 = new Account(id, "user1", "user1@example.com", "1", "ROLE_USER");
+            accountRepository.create(a1);
+            Account a2 = new Account(id, "user2", "user2@example.com", "2", "ROLE_USER");
+            int rowsAffected = accountRepository.update(a2, id);
+            assertEquals(rowsAffected, 1);
+        }
     }
 }

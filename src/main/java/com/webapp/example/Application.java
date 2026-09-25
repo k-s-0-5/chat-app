@@ -46,8 +46,21 @@ public class Application {
           new Conversation(con1, "user1 & user2", LocalDateTime.parse("2026-04-25T10:01:00")));
       participationRepository.create(new Participant(1, acc1, con1, LocalDateTime.now(), "ADMIN"));
       participationRepository.create(new Participant(2, acc2, con1, LocalDateTime.now(), "USER"));
-      messageRepository.testCreate(new Message((long)0, acc1, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hello there!", false));
-      messageRepository.testCreate(new Message((long)1, acc2, con1, LocalDateTime.parse("2026-05-25T10:01:00"), "Hi!", false));
+
+      String[] texts = {
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
+        "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", 
+        "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", 
+        "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", 
+        "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", 
+      };
+
+      LocalDateTime time = LocalDateTime.parse("2026-05-25T10:01:00");
+      for (int i = 0; i < 50; i++) {
+          UUID sender = (i % 2 == 0) ? acc1 : acc2;
+          messageRepository.testCreate(new Message((long) i, sender, con1, time, texts[i], false));
+          time = time.plusDays(1);
+      }
     };
   }
 }

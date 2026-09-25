@@ -3,6 +3,9 @@ package com.webapp.example.message;
 import com.webapp.example.Errors.MessageNotFoundException;
 import com.webapp.example.account.AccountService;
 import com.webapp.example.conversation.ConversationService;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -23,8 +26,8 @@ public class MessageService {
     this.conversationService = conversationService;
   }
 
-  public List<Message> findByConversationId(UUID conversationId) {
-    return messageRepository.findByConversationId(conversationId);
+  public List<Message> findByConversationId(UUID conversationId, LocalDateTime timestamp) {
+    return messageRepository.findByConversationId(conversationId, timestamp);
   }
 
   public Message findById(long id) {
@@ -37,7 +40,7 @@ public class MessageService {
     return messageRepository.create(messageCreateRequest, accountId);
   }
 
-  public Message editMessage(MessageUpdateRequest messageUpdateRequest, String username) {
+  public Message updateMessage(MessageUpdateRequest messageUpdateRequest, String username) {
     UUID accountId = accountService.findIdByUsername(username);
     Message original = findById(messageUpdateRequest.id());
     if (!accountId.equals(original.accountId())) return null;
@@ -47,6 +50,7 @@ public class MessageService {
   public UUID deleteMessage(Long id, String username) {
     UUID accountId = accountService.findIdByUsername(username);
     Message message = findById(id);
+    if (!accountId.equals(message.accountId())) return null;
     messageRepository.delete(id, accountId);
     return message.conversationId();
   }

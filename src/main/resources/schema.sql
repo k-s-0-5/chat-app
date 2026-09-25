@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS Message (
     conversation_id UUID NOT NULL,
     sent_at timestamp NOT NULL,
     contents varchar(1000) NOT NULL,
-    attachment_url varchar(100),
     edited BOOLEAN,
 
     FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE,

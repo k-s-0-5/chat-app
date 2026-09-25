@@ -23,49 +23,56 @@
                 <div class="header-3"></div>
                 <div class="conversations" style="padding: 10px;">
                     <div style="max-height: 100%; overflow-y: auto; padding: 10px;">
-						<div th:fragment="conversationList" id="conversation-list">
-							<div th:each="conversation : ${conversations}">
-								<button class="neon-box" onclick="fetchMessages(this)" th:data-id="${conversation.id}" style="margin-bottom: 10px;">
-									<div style="color: #fff;" th:text="${conversation.title}">Title</div>
-									<div style="color: #ccc; font-size: smaller;" th:text="${#temporals.format(conversation.lastSent, 'dd/MM/yy hh:mm a')}">
-									Timestamp</div>
-								</button>
-							</div>
+						<div id="conversation-list">
+							<th:block th:fragment="conversationList">
+								<div th:each="conversation : ${conversations}">
+									<button class="neon-box" onclick="fetchMessages(this)" th:data-id="${conversation.id}" style="margin-bottom: 10px;">
+										<div style="color: #fff;" th:text="${conversation.title}">Title</div>
+										<div style="color: #ccc; font-size: smaller;" th:text="${#temporals.format(conversation.lastSent, 'dd/MM/yy hh:mm a')}">
+										Timestamp</div>
+									</button>
+								</div>
+							</th-block>
 						</div>
                     </div>
                 </div>
                 <div class="chat" style="padding: 10px;">
-					<div style="height: 100%; overflow-y: auto; padding: 10px;">
-						<div th:fragment="messageList" id="message-list">
-							<div th:if="${messages == null}">
-								<p style="color: #fff; font-size: small; text-align: center;">Select a conversation</p>
-							</div>
-							<div th:each="message : ${messages}" th:data-id="${message.id}" class="message-wrapper">
-								<div class="time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
-									<small th:text="${#temporals.format(message.sentAt, 'dd/MM/yy, hh:mm a') + (message.edited ? ' edited' : '')}"></small>
+					<div id="chat-scroll" style="height: 100%; overflow-y: auto; padding: 10px;">
+						<div id="loading" style="color: #fff; font-size: small; text-align: center;" hidden>Loading...</div>
+						<div id="message-list">
+							<th:block th:fragment="messageList">
+								<div th:if="${messages == null}"><p style="color: #fff; font-size: small; text-align: center;">Select a conversation</p></div>
+								<div th:each="message : ${messages}" class="message-wrapper" th:data-id="${message.id}" th:data-sent-at="${message.sentAt}">
+									<div class="time" th:classappend="${message.accountId == currentUserId} ? 'time--out' : 'time--in'">
+										<small th:text="${#temporals.format(message.sentAt, 'dd/MM/yy, hh:mm a') + (message.edited ? ' edited' : '')}"></small>
+									</div>
+									<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--out' : 'message--in'">
+										<a th:if="${message.accountId == currentUserId}" class="edit-message" onclick="editMessage(this)">
+											<svg viewBox="0 0 24 24" fill="none">
+												<path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+												</path>
+												<path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">														
+												</path> 
+											</svg>
+										</a>
+										<span th:text="${message.contents}">Message</span>
+									</div>
 								</div>
-								<div class="message" th:classappend="${message.accountId == currentUserId} ? 'message--out' : 'message--in'">
-									<a th:if="${message.accountId == currentUserId}" class="edit-message" onclick="editMessage(this)">
-										<svg viewBox="0 0 24 24" fill="none">
-											<path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-											</path>
-											<path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">														
-											</path> 
-										</svg>
-									</a>
-									<span th:text="${message.contents}">Message</span>
-								</div>
-							</div>
+							</th:block>
 						</div>
 					</div>
-                    <form id="message-form" method="post"
-                            style="width: 100%; align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center; gap: 10px;">
-                        <input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block; min-height: 0px;">
-                        <input class="neon-box" type="submit" style="width: 30%; min-height: 0px; min-width: 50px; max-width: 100px;" value="Send">
-                    </form>
                 </div>
-                <div class="send">a</div>
-            </div>
+                <div class="send" style="padding: 10px;">
+					<div style="padding: 10px;">
+						<form id="message-form" method="post"
+								style="width: 100%; align-content: space-between; display: flex; flex-direction: row; justify-content: space-between; border-radius: 10px; justify-self: center; gap: 10px;">
+							<input type="text" id="message-input" name="contents" placeholder="Send a message" style="display: inline-block; min-height: 0px;">
+							<input class="neon-box" type="submit" style="width: 30%; min-height: 0px; min-width: 50px; max-width: 100px;" value="Send">
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
 <script>
@@ -74,6 +81,8 @@
 	let subscription = null;
 	let stompClient = null;
 	let currentUserId = null;
+	let oldestMessage = null;
+	let scrollHeight = null;
 	const editIcon = `<svg viewBox="0 0 24 24" fill="none">
 							<path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 							</path>
@@ -84,6 +93,164 @@
 	const excludedDiv = document.getElementById('search-container');
 	const search = document.getElementById("search");
 	const messageList = document.getElementById('message-list');
+	const chatScroll = document.getElementById("chat-scroll");
+
+	// Listeners
+	// Message submit listener
+	document.getElementById("message-form")
+    .addEventListener("submit", async (event) => {
+		event.preventDefault();
+		const message = {
+			conversationId: conversationId,
+			contents: document.getElementById("message-input").value
+		};
+		if (!message.contents || !conversationId) {
+			return;
+		}
+		stompClient.publish({
+			destination: "/ws/messages.send",
+			body: JSON.stringify(message)
+		});
+		document.getElementById("message-input").value = "";
+	})
+
+	document.addEventListener('click', (event) => {
+		if (!excludedDiv.contains(event.target)) {
+			clearSearchResults();
+		}
+	});
+
+	document.addEventListener("DOMContentLoaded", async () => {
+    	currentUserId = await fetchCurrentUserId();
+		const conversation = window.location.pathname.match(/\/conversation\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/messages/);
+		if (conversation){
+			fetchMessages(document.querySelector(`[data-id="${conversation[1]}"]`));
+		}
+	});
+
+	chatScroll.addEventListener("scroll", async (event) => {
+		if (chatScroll.scrollTop == 0){
+			scrollHeight = chatScroll.scrollHeight;
+			document.getElementById('loading').hidden = false;
+			await fetchOlderMessages();
+			document.getElementById('loading').hidden = true;
+			chatScroll.scrollTop = chatScroll.scrollHeight - scrollHeight;
+			scrollHeight = chatScroll.scrollHeight;
+		}
+	});
+
+	// Functions
+	// Retrieve messages for a given conversation
+	async function fetchMessages(element) {
+		if (!element || element.getAttribute('data-id') == conversationId) {
+			return;
+		}
+		if(conversationId != null) {
+			selectedElement.classList.remove("selected-box");
+		}
+		selectedElement = element;
+		element.classList.add("selected-box");
+		conversationId = element.getAttribute('data-id');
+		oldestMessage = getJavaTime(Date.now());
+
+		try {
+			const response = await fetch(`/conversation/${conversationId}/messages?before=${encodeURIComponent(oldestMessage)}`, { 
+					headers: { 'X-Requested-With': 'XMLHttpRequest' },
+			});
+			
+			if (response.ok){
+				const html = await response.text();
+				document.getElementById('message-list').innerHTML = html;
+				if (messageList.querySelector('.message-wrapper')) {
+				 	oldestMessage = messageList.querySelector('.message-wrapper').dataset.sentAt;
+				}
+				scrollHeight = chatScroll.scrollHeight;
+				chatScroll.scrollTop = scrollHeight;
+				history.pushState({ id: conversationId }, '', `/conversation/${conversationId}/messages`);
+			} else {
+				console.log("No response");
+			}
+		} catch (error) {
+			console.error(error);
+		}
+
+		// Connect to new conversation
+		if (subscription){
+			subscription.unsubscribe();
+		}
+		stomp();
+	}
+
+	async function fetchOlderMessages(){
+		try {
+			const response = await fetch(`/conversation/${conversationId}/messages?before=${encodeURIComponent(oldestMessage)}`, { 
+					headers: { 'X-Requested-With': 'XMLHttpRequest' },
+			});
+		
+			if (response.ok){
+				const html = await response.text();
+				document.getElementById('message-list').insertAdjacentHTML('afterbegin', html);
+				oldestMessage = messageList.querySelector('.message-wrapper').dataset.sentAt;
+			} else {
+				console.log("No response");
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	function stomp (){
+		if (stompClient) {
+			stompClient.deactivate();
+		}
+
+		stompClient = new StompJs.Client({
+			brokerURL: 'ws://localhost:8080/connect',
+			debug: function (str) {
+				console.log(str);
+			},
+			reconnectDelay: 3000,
+			heartbeatIncoming: 3000,
+			heartbeatOutgoing: 3000,
+		});
+
+		stompClient.onConnect = function (frame) {
+			subscription = stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
+				const parsedMessage = JSON.parse(message.body);
+				if (parsedMessage.event == "send") {
+					messageList.appendChild(buildMessage(parsedMessage));
+					messageList.scrollTop = messageList.scrollHeight;
+				} else if (parsedMessage.event == "edit") {
+					document.querySelector(`[data-id="${parsedMessage.body.id}"]`).replaceChildren(buildMessage(parsedMessage));
+				} else if (parsedMessage.event == "delete") {
+					document.querySelector(`[data-id="${parsedMessage.body}"]`).remove();
+				}
+			});
+		};
+
+		stompClient.onStompError = function (frame) {
+			console.error('error');
+		};
+
+		stompClient.activate();
+	}
+
+	function buildMessage(parsedMessage){
+		const isMe = (parsedMessage.body.accountId == currentUserId);
+		const messageClass = isMe ? 'message--out' : 'message--in';
+		const timeClass = isMe ? 'time--out' : 'time--in';
+		const time = getFormattedTime(parsedMessage.body.sentAt);
+		const button = buildHTML('a', { className: "edit-message", onclick: function(event) { editMessage(event.target); } });
+		button.innerHTML = editIcon;
+		const message = buildHTML('div', { className: "message-wrapper", 'data-id': parsedMessage.body.id },
+				buildHTML('div', { className: `time ${timeClass}` }, 
+					buildHTML('small', { style: "color: #fff" }, createText(time + (parsedMessage.body.edited ? ' edited' : '')))),
+				buildHTML('div', { className: `message ${messageClass}` }, 
+					...(isMe ? [button,	buildHTML('span', null, createText(parsedMessage.body.contents))] : [buildHTML('span', null, createText(parsedMessage.body.contents))])
+				)
+			)
+		return message;
+	}
 
 	function editMessage(element) {
 		const currentMessage = element.closest('.message--out');
@@ -123,132 +290,10 @@
 		currentMessage.replaceChildren(html);
 	}
 
-	// Listeners
-	// Message submit listener
-	document.getElementById("message-form")
-    .addEventListener("submit", async (event) => {
-		event.preventDefault();
-		const message = {
-			conversationId: conversationId,
-			contents: document.getElementById("message-input").value
-		};
-		if (!message.contents || !conversationId) {
-			return;
-		}
-		stompClient.publish({
-			destination: "/ws/messages.send",
-			body: JSON.stringify(message)
-		});
-		document.getElementById("message-input").value = "";
-	})
-
-	document.addEventListener('click', (event) => {
-		if (!excludedDiv.contains(event.target)) {
-			clearSearchResults();
-		}
-	});
-
-	document.addEventListener("DOMContentLoaded", async () => {
-    	currentUserId = await fetchCurrentUserId();
-		const conversation = window.location.pathname.match(/\/conversation\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/messages/);
-		if (conversation){
-			fetchMessages(document.querySelector(`[data-id="${conversation[1]}"]`));
-		}
-	});
-
-	// Functions
-	// Retrieve messages for a given conversation
-	async function fetchMessages(element) {
-		if (!element || element.getAttribute('data-id') == conversationId) {
-			return;
-		}
-
-		if(conversationId != null) {
-			selectedElement.classList.remove("selected-box");
-		}
-		selectedElement = element;
-		conversationId = element.getAttribute('data-id');
-		element.classList.add("selected-box");
-
-		try {
-			const response = await fetch(`/conversation/${conversationId}/messages`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-			
-			if (response.ok){
-				const html = await response.text();
-				document.getElementById('message-list').innerHTML = html;
-				history.pushState({ id: conversationId }, '', `/conversation/${conversationId}/messages`);
-			} else {
-				console.log("No response");
-			}
-		} catch (error) {
-			console.error(error);
-		}
-
-		// Connect to new conversation
-		if (subscription){
-			subscription.unsubscribe();
-		}
-		stomp();
-	}
-
-	function stomp (){
-		if (stompClient) {
-			stompClient.deactivate();
-		}
-
-		stompClient = new StompJs.Client({
-			brokerURL: 'ws://localhost:8080/connect',
-			debug: function (str) {
-				console.log(str);
-			},
-			reconnectDelay: 3000,
-			heartbeatIncoming: 3000,
-			heartbeatOutgoing: 3000,
-		});
-
-		stompClient.onConnect = function (frame) {
-			subscription = stompClient.subscribe('/topic/messages.' + conversationId, function (message) {
-				const parsedMessage = JSON.parse(message.body);
-				if (parsedMessage.event == "send") {
-					messageList.appendChild(buildMessage(parsedMessage));
-					messageList.scrollTop = messageList.scrollHeight;
-				} else if (parsedMessage.event == "edit") {
-					document.querySelector(`[data-id="${parsedMessage.body.id}"]`).replaceChildren(buildMessage(parsedMessage));
-				} else if (parsedMessage.event == "delete") {
-					console.log(parsedMessage.body + " DELETE");
-					document.querySelector(`[data-id="${parsedMessage.body}"]`).remove();
-				}
-			});
-		};
-
-		stompClient.onStompError = function (frame) {
-			console.error('error');
-		};
-
-		stompClient.activate();
-	}
-
-	function buildMessage(parsedMessage){
-		const isMe = (parsedMessage.body.accountId == currentUserId);
-		const messageClass = isMe ? 'message--out' : 'message--in';
-		const timeClass = isMe ? 'time--out' : 'time--in';
-		const time = getFormattedTime(parsedMessage.body.sentAt);
-		const button = buildHTML('a', { className: "edit-message", onclick: function(event) { editMessage(event.target); } });
-		button.innerHTML = editIcon;
-		const message = buildHTML('div', { className: "message-wrapper", 'data-id': parsedMessage.body.id },
-				buildHTML('div', { className: `time ${timeClass}` }, 
-					buildHTML('small', { style: "color: #fff" }, createText(time + (parsedMessage.body.edited ? ' edited' : '')))),
-				buildHTML('div', { className: `message ${messageClass}` }, 
-					...(isMe ? [button,	buildHTML('span', null, createText(parsedMessage.body.contents))] : [buildHTML('span', null, createText(parsedMessage.body.contents))])
-				)
-			)
-		return message;
-	}
-
 	// Finds users whose username contains the search entry and appends results to search results
 	async function searchForUser(){
 		try {
-			const response = await fetch(`/accounts/search/${encodeURIComponent(search.value)}`);
+			const response = await fetch(`/accounts/search?username=${encodeURIComponent(search.value)}`);
 
 			if (response.ok){
 				const accounts = await response.json(); // JSON list of accounts containing matching values
@@ -272,10 +317,6 @@
 
 	// Create a new conversation
 	async function createConversation(id) {
-		if (currentUserId == id) { 
-			return; // Return if user selected is oneself
-		}
-
 		try {
 			const accountIds = [id];
 
@@ -288,7 +329,7 @@
 
 			if (response.ok){
 				const html = await response.text();
-				document.getElementById('conversation-list').innerHTML = html;
+				document.getElementById('conversation-list').outerHTML = html;
 				clearSearchResults();
 			} else {
 				console.log("No response");
@@ -354,6 +395,11 @@
 			minute: '2-digit',
 			hour12: true
 		}).format(now);
+	}
+
+	function getJavaTime(timestamp){
+		const now = new Date(timestamp);
+		return now.toISOString().slice(0, 19);
 	}
 
 	function clearSearchResults(){

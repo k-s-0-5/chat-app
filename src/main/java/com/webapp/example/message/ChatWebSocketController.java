@@ -22,7 +22,7 @@ public class ChatWebSocketController {
   }
 
   // Important note, SecurityContextHolder is a thread-local utility meaning it does not work
-  // with WebSockets, principals do work however
+  // with WebSockets, principals do, however
   @MessageMapping("/messages.send")
   public void sendMessage(@Valid MessageCreateRequest messageCreateRequest, Principal principal) {
     Message created = messageService.createMessage(messageCreateRequest, principal.getName());
@@ -32,7 +32,7 @@ public class ChatWebSocketController {
 
   @MessageMapping("/messages.edit")
   public void editMessage(@Valid MessageUpdateRequest messageUpdateRequest, Principal principal) {
-    Message edited = messageService.editMessage(messageUpdateRequest, principal.getName());
+    Message edited = messageService.updateMessage(messageUpdateRequest, principal.getName());
     messagingTemplate.convertAndSend(
         "/topic/messages." + edited.conversationId(), Map.of("event", "edit", "body", edited));
   }

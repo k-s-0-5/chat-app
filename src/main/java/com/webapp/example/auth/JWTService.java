@@ -12,12 +12,15 @@ import java.util.Map;
 import java.util.function.Function;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JWTService {
 
+  @Value("${jwt.secret}")
   private String key;
 
   public String generateToken(String username) {
@@ -28,25 +31,26 @@ public class JWTService {
         .add(claims)
         .subject(username)
         .issuedAt(new Date(System.currentTimeMillis()))
-        .expiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 30))) // 30 hours
+        .expiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 24))) // 24 hours
         .and()
         .signWith(getKey())
         .compact();
   }
 
-  public JWTService() {
-    try {
-      KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-      SecretKey sk = keyGen.generateKey();
-      key = Base64.getEncoder().encodeToString(sk.getEncoded());
-    } catch (NoSuchAlgorithmException e) {
+  // public JWTService() {
+  //   try {
+  //     KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+  //     SecretKey sk = keyGen.generateKey();
+  //     key = Base64.getEncoder().encodeToString(sk.getEncoded());
+  //   } catch (NoSuchAlgorithmException e) {
 
-    }
-  }
+  //   }
+  // }
 
   private SecretKey getKey() {
     byte[] keyBytes = Decoders.BASE64.decode(key);
     return Keys.hmacShaKeyFor(keyBytes);
+    
   }
 
   public String extractUsername(String token) {

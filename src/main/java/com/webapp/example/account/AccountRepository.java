@@ -86,19 +86,19 @@ public class AccountRepository {
   }
 
   /**
-   * Retrieves account where account.username like usernameSegment
+   * Retrieves account where account.username is like usernameSegment (excludes requester's id)
    *
    * @param usernameSegment
    * @return List of accounts
    */
-  public List<AccountSearchRequest> findByUsernameSegment(String usernameSegment) {
+  public List<AccountSearchResult> findByUsernameSegment(String usernameSegment, UUID id) {
     return jdbcClient
         .sql(
             """
-            SELECT id, username FROM Account WHERE username LIKE :usernameSegment LIMIT 7;
+            SELECT id, username FROM Account WHERE username LIKE ? AND id != ? LIMIT 7;
             """)
-        .param("usernameSegment", "%" + usernameSegment + "%")
-        .query(AccountSearchRequest.class)
+        .params("%" + usernameSegment + "%", id)
+        .query(AccountSearchResult.class)
         .list();
   }
 
@@ -107,8 +107,8 @@ public class AccountRepository {
    *
    * @param account
    */
-  public void create(Account account) {
-    jdbcClient
+  public int create(Account account) {
+    return jdbcClient
         .sql(
             """
             INSERT INTO Account(
@@ -126,17 +126,17 @@ public class AccountRepository {
   }
 
   /**
-   * Replaces conversation where account.id == id with updatedAccount
+   * Replaces account where account.id == id with updatedAccount
    *
    * @param updatedAccount
    * @param id
    */
-  public void update(Account updatedAccount, UUID id) {
-    jdbcClient
+  public int update(Account updatedAccount, UUID id) {
+    return jdbcClient
         .sql(
             """
             UPDATE Account SET username = ?,
-            email = ?, password = ?, role = ? where id = ?)
+            email = ?, password = ?, role = ? WHERE id = ?
             """)
         .params(
             List.of(
@@ -153,11 +153,11 @@ public class AccountRepository {
    *
    * @param id
    */
-  public void delete(UUID id) {
-    jdbcClient
+  public int delete(UUID id) {
+    return jdbcClient
         .sql(
             """
-            DELETE FROM Account where id = :id
+            DELETE FROM Account WHERE id = :id
             """)
         .param("id", id)
         .update();

@@ -7,11 +7,13 @@ import com.webapp.example.account.LoginRequest;
 import com.webapp.example.account.SignupRequest;
 import com.webapp.example.auth.UserPrincipal;
 import com.webapp.example.conversation.ConversationService;
+import com.webapp.example.message.Message;
 import com.webapp.example.message.MessageService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ViewController {
@@ -63,17 +66,17 @@ public class ViewController {
   @GetMapping("/conversation/{conversationId}/messages")
   public String getConversationMessages(
       @PathVariable UUID conversationId,
+      @RequestParam LocalDateTime before,
       Model model,
       @AuthenticationPrincipal UserPrincipal principal,
       jakarta.servlet.http.HttpServletRequest request) {
 
     if (!conversationService.isAccountInConversation(principal.getId(), conversationId)) {
-      model.addAttribute(
-          "conversations", conversationService.getMyConversations(principal.getAccount()));
       return "redirect:/home";
     }
 
-    model.addAttribute("messages", messageService.findByConversationId(conversationId));
+    List<Message> messages = messageService.findByConversationId(conversationId, before).reversed();
+    model.addAttribute("messages", messages);
     model.addAttribute("currentUserId", principal.getId());
 
     String requestedWith = request.getHeader("X-Requested-With");

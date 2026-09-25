@@ -8,6 +8,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.webapp.example.auth.JWTService;
+import com.webapp.example.auth.MyUserDetailsService;
+import com.webapp.example.auth.UserPrincipal;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -18,16 +21,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.webapp.example.auth.JWTService;
-import com.webapp.example.auth.MyUserDetailsService;
-import com.webapp.example.auth.UserPrincipal;
-
 @WebMvcTest(AccountController.class)
 @DisplayName("Account Controller Tests")
 class AccountControllerUnitTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
   @MockitoBean private JWTService jwtService;
 
@@ -42,51 +40,56 @@ class AccountControllerUnitTest {
   class FindBySegmentTests {
     @Test
     void testFindByUsernameSegment() {
-      List<AccountSearchRequest> accounts =
+      List<AccountSearchResult> accounts =
           List.of(
-              new AccountSearchRequest(UUID.randomUUID(), "12345"),
-              new AccountSearchRequest(UUID.randomUUID(), "52341"));
-      when(accountRepository.findByUsernameSegment("234")).thenReturn(accounts);
-      assertEquals(accounts, accountController.findByUsernameSegment("234"));
+              new AccountSearchResult(UUID.randomUUID(), "12345"),
+              new AccountSearchResult(UUID.randomUUID(), "52341"));
+      when(accountRepository.findByUsernameSegment("234", UUID.randomUUID())).thenReturn(accounts);
+      UserPrincipal principal = mock(UserPrincipal.class);
+      assertEquals(accounts, accountController.findByUsernameSegment(principal, "234"));
     }
 
     @Test
     void testFindByUsernameSegmentAPI() throws Exception {
       UserPrincipal principal = mock(UserPrincipal.class);
-      List<AccountSearchRequest> accounts =
+      List<AccountSearchResult> accounts =
           List.of(
-              new AccountSearchRequest(UUID.randomUUID(), "12345"),
-              new AccountSearchRequest(UUID.randomUUID(), "52341"));
-      when(accountRepository.findByUsernameSegment("234")).thenReturn(accounts);      
-      mockMvc.perform(get("/accounts/search/{usernameSegment}", 234).with(user(principal))).andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].username").value(accounts.get(0).username()))
-        .andExpect(jsonPath("$[1].username").value(accounts.get(1).username()));
+              new AccountSearchResult(UUID.randomUUID(), "12345"),
+              new AccountSearchResult(UUID.randomUUID(), "52341"));
+      when(accountRepository.findByUsernameSegment("234", UUID.randomUUID())).thenReturn(accounts);
+      mockMvc
+          .perform(get("/accounts/search/{usernameSegment}", 234).with(user(principal)))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$[0].username").value(accounts.get(0).username()))
+          .andExpect(jsonPath("$[1].username").value(accounts.get(1).username()));
     }
 
     @Test
     void testFindByZeroLengthUsernameSegment() {
-      assertEquals(List.of(), accountController.findByUsernameSegment(""));
+      UserPrincipal principal = mock(UserPrincipal.class);
+      assertEquals(List.of(), accountController.findByUsernameSegment(principal, ""));
     }
   }
-
 
   @Nested
   @DisplayName("Get Current Account Id Tests")
   class GetCurrentAccountTests {
     @Test
     void testGetCurrentAccountId() {
-        UUID id = UUID.randomUUID();
-        UserPrincipal principal = mock(UserPrincipal.class);
-        when(principal.getId()).thenReturn(id);
-        assertEquals(principal.getId(), accountController.getCurrentAccountId(principal));
+      UUID id = UUID.randomUUID();
+      UserPrincipal principal = mock(UserPrincipal.class);
+      when(principal.getId()).thenReturn(id);
+      assertEquals(principal.getId(), accountController.getCurrentAccountId(principal));
     }
 
     @Test
     void testGetCurrentAccountIdAPI() throws Exception {
-        UUID id = UUID.randomUUID();
-        UserPrincipal principal = mock(UserPrincipal.class);
-        when(principal.getId()).thenReturn(id);
-        mockMvc.perform(get("/accounts/me").with(user(principal))).andExpect(status().isOk())
+      UUID id = UUID.randomUUID();
+      UserPrincipal principal = mock(UserPrincipal.class);
+      when(principal.getId()).thenReturn(id);
+      mockMvc
+          .perform(get("/accounts/me").with(user(principal)))
+          .andExpect(status().isOk())
           .andExpect(jsonPath("$").value(id.toString()));
     }
   }
