@@ -37,8 +37,8 @@ public class ConversationService {
    * @param account
    * @return List of conversations
    */
-  public List<Conversation> getMyConversations(Account account) {
-    List<Participant> participants = participantRepository.findAllWithAccount(account);
+  public List<Conversation> getMyConversations(UUID accountId) {
+    List<Participant> participants = participantRepository.findAllWithAccount(accountId);
     List<Conversation> conversations = new ArrayList<Conversation>();
     for (Participant p : participants) {
       conversations.add(conversationRepository.findById(p.conversationId()).get());

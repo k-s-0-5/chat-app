@@ -74,13 +74,13 @@ public class ParticipantRepository {
    *
    * @return List of all participants
    */
-  public List<Participant> findAllWithAccount(Account account) {
+  public List<Participant> findAllWithAccount(UUID accountId) {
     return jdbcClient
         .sql(
             """
             SELECT * FROM Participant WHERE account_id = :accountId
             """)
-        .param("accountId", account.id())
+        .param("accountId", accountId)
         .query(Participant.class)
         .list();
   }

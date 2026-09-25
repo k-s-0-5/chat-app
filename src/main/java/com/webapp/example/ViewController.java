@@ -59,7 +59,7 @@ public class ViewController {
   @GetMapping("/home")
   public String home(Model model, @AuthenticationPrincipal UserPrincipal principal) {
     model.addAttribute(
-        "conversations", conversationService.getMyConversations(principal.getAccount()));
+        "conversations", conversationService.getMyConversations(principal.getId()));
     return "homepage";
   }
 
@@ -85,7 +85,7 @@ public class ViewController {
     }
 
     model.addAttribute(
-        "conversations", conversationService.getMyConversations(principal.getAccount()));
+        "conversations", conversationService.getMyConversations(principal.getId()));
     return "homepage";
   }
 
@@ -108,7 +108,7 @@ public class ViewController {
     }
     conversationService.createConversation(accounts);
     model.addAttribute(
-        "conversations", conversationService.getMyConversations(principal.getAccount()));
+        "conversations", conversationService.getMyConversations(principal.getId()));
     return "homepage :: conversationList";
   }
 
