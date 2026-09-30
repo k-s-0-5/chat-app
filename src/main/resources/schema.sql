@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Message (
     account_id UUID NOT NULL,
     conversation_id UUID NOT NULL,
     sent_at timestamp NOT NULL,
-    contents varchar(1000) NOT NULL,
+    contents VARBINARY(1028) NOT NULL,
     edited BOOLEAN,
 
     FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE,

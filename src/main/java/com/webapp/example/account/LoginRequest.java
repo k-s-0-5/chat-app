@@ -1,4 +1,5 @@
 package com.webapp.example.account;
 
+import jakarta.validation.constraints.NotNull;
 
-public record LoginRequest(String username, String password) {}
+public record LoginRequest(@NotNull String username, @NotNull String password) {}

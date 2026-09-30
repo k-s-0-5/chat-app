@@ -2,9 +2,9 @@ package com.webapp.example.message;
 
 import com.webapp.example.Errors.MessageNotFoundException;
 import com.webapp.example.account.AccountService;
-import com.webapp.example.conversation.Conversation;
 import com.webapp.example.conversation.ConversationService;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -62,6 +62,9 @@ public class MessageService {
    * @return Created message
    */
   public Message create(MessageCreateRequest messageCreateRequest, String username) {
+    if (messageCreateRequest.contents().getBytes(StandardCharsets.UTF_8).length > 1000) {
+      throw new IllegalArgumentException("Message exceeds byte limit");
+    }
     UUID accountId = accountService.findIdByUsername(username);
     if (!conversationService.isAccountInConversation(accountId, messageCreateRequest.conversationId())) {
       throw new AccessDeniedException("Not a participant in this conversation");
@@ -77,6 +80,9 @@ public class MessageService {
    * @return Updated message
    */
   public Message update(MessageUpdateRequest messageUpdateRequest, String username) {
+    if (messageUpdateRequest.contents().getBytes(StandardCharsets.UTF_8).length > 1000) {
+      throw new IllegalArgumentException("Message exceeds byte limit");
+    }
     UUID accountId = accountService.findIdByUsername(username);
     Message original = findById(messageUpdateRequest.id());
     if (!accountId.equals(original.accountId())) {

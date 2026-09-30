@@ -35,7 +35,7 @@ export function buildMessage(parsedMessage, userId){
     buildHTML('div', { className: `time ${isMe ? 'time--out' : 'time--in'}` }, 
       buildHTML('small', { }, createText(getFormattedTime(parsedMessage.body.sentAt) + (parsedMessage.body.edited ? ' edited' : '')))),
     buildHTML('div', { className: `message ${isMe ? 'message--out' : 'message--in'}` }, 
-      ...(isMe ? [button,	buildHTML('span', null, createText(parsedMessage.body.contents))] : [buildHTML('span', null, createText(parsedMessage.body.contents))])
+      ...(isMe ? [button,	buildHTML('p', null, createText(parsedMessage.body.contents))] : [buildHTML('p', null, createText(parsedMessage.body.contents))])
     )
     )
   return message;
@@ -55,4 +55,8 @@ export function buildAccountSearchResults(accountsJSON, searchResults, searchInp
 export function clearSearchResults(searchResults, searchInput) {
   searchResults.replaceChildren();
   searchInput.style.borderRadius = "7px";
+}
+
+export function hideElement(element) {
+  element.hidden = true;
 }

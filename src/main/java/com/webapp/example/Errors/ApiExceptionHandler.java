@@ -43,13 +43,26 @@ public class ApiExceptionHandler {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
   }
 
-  @MessageExceptionHandler(MethodArgumentNotValidException.class)
-  public void argumentInvalid(MethodArgumentNotValidException ex) {
-    // TO-DO return info to user
+  @ExceptionHandler(IllegalArgumentException.class) // Thrown at wrong shape for db
+  public ResponseEntity<ProblemDetail> argumentIllegal(IllegalArgumentException ex, HttpServletRequest request) {
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    problemDetail.setTitle("Argument not legal");
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class) // Thrown at @valid
+  public ResponseEntity<ProblemDetail> argumentInvalid(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    problemDetail.setTitle("Invalid argument");
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
   }
 
   @MessageExceptionHandler(CryptoException.class)
-  public void cryptoError(CryptoException ex) {
-    // TO-DO return crypto information
+  public String cryptoError(CryptoException ex) {
+    return ex.getMessage();
   }
 }

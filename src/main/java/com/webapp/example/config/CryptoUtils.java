@@ -31,7 +31,7 @@ public class CryptoUtils {
   //     return keygenerator.generateKey();
   // }
 
-  public String encrypt(String input) {
+  public byte[] encrypt(String input) {
     try {
       byte[] iv = new byte[12];
       SecureRandom secureRandom = new SecureRandom();
@@ -42,21 +42,20 @@ public class CryptoUtils {
       cipher.init(Cipher.ENCRYPT_MODE, sk, gcmSpec);
 
       byte[] encryptedBytes = cipher.doFinal(input.getBytes(StandardCharsets.UTF_8));
-
       byte[] combinedIvAndCipher = new byte[iv.length + encryptedBytes.length];
       System.arraycopy(iv, 0, combinedIvAndCipher, 0, iv.length);
       System.arraycopy(encryptedBytes, 0, combinedIvAndCipher, iv.length, encryptedBytes.length);
-
-      return Base64.getEncoder().encodeToString(combinedIvAndCipher);
-
+      return combinedIvAndCipher;
+      // return Base64.getEncoder().encodeToString(combinedIvAndCipher);
     } catch (Exception e) {
       throw new CryptoException("Failed to encrypt message");
     }
   }
 
-  public String decrypt(String cipherText) {
+  public String decrypt(byte[] cipherText) {
     try {
-      byte[] decodedCipherText = Base64.getDecoder().decode(cipherText);
+      // byte[] decodedCipherText = Base64.getDecoder().decode(cipherText);
+      byte[] decodedCipherText = cipherText;
 
       byte[] iv = new byte[12];
       System.arraycopy(decodedCipherText, 0, iv, 0, iv.length);
@@ -70,7 +69,6 @@ public class CryptoUtils {
       byte[] decryptedBytes = cipher.doFinal(encryptedText);
 
       return new String(decryptedBytes, StandardCharsets.UTF_8);
-
     } catch (Exception e) {
       throw new CryptoException("Failed to decrypt message");
     }

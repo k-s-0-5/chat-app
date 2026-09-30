@@ -74,7 +74,7 @@ public class MessageRepository {
                     UUID.fromString(rs.getString("account_id")),
                     UUID.fromString(rs.getString("conversation_id")),
                     rs.getTimestamp("sent_at").toLocalDateTime(),
-                    cryptoUtils.decrypt(rs.getString("contents")),
+                    cryptoUtils.decrypt(rs.getBytes("contents")),
                     rs.getBoolean("edited")))
         .list();
   }
@@ -102,7 +102,7 @@ public class MessageRepository {
                     UUID.fromString(rs.getString("account_id")),
                     UUID.fromString(rs.getString("conversation_id")),
                     rs.getTimestamp("sent_at").toLocalDateTime(),
-                    cryptoUtils.decrypt(rs.getString("contents")),
+                    cryptoUtils.decrypt(rs.getBytes("contents")),
                     rs.getBoolean("edited")))
         .list();
   }

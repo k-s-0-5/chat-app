@@ -13,7 +13,7 @@
   --message-out: rgba(20, 120, 220, 1);
   --text-in: rgba(40, 40, 40, 1);
   --text-out: rgba(255, 255, 255, 1);
-  
+
   --text-bright: rgba(255, 255, 255, 1);
   --text-dim: rgba(200, 200, 200, 1);
   --text-error: rgba(255, 100, 100, 1);
@@ -35,15 +35,22 @@ body {
   font-family: sans-serif;
 }
 
+p {
+  margin: 0px;
+}
+
 .page {
-  width: 100%; height:100%; overflow: hidden;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 form {
   background-color: var(--background-glow);
 }
 
-input, button {
+input,
+button {
   background-color: var(--button-color);
   color: var(--text-bright);
   border: none;
@@ -79,7 +86,8 @@ svg {
 ::-webkit-scrollbar {
   width: 10px;
 }
-::-webkit-scrollbar-track, ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-thumb {
   background-color: var(--transparent);
   border-radius: 5px;
 }
@@ -154,8 +162,8 @@ svg {
 }
 
 .scrollable-list {
-  max-height: 100%; 
-  overflow-y: auto; 
+  max-height: 100%;
+  overflow-y: auto;
   padding: 10px;
 }
 
@@ -198,7 +206,6 @@ svg {
   .header-1 {
     min-width: 50vw;
   }
-  
 }
 
 .results {
@@ -256,9 +263,9 @@ svg {
 
 /* https://stackoverflow.com/questions/32208665/fit-width-of-div-tightly-to-multi-line-span */
 .message {
-  display: flex;
-  align-items: center;
   position: relative;
+  box-sizing: content-box;
+  display: flex;
   border-radius: 10px;
   font-weight: 500;
   max-width: 70%;
@@ -280,24 +287,25 @@ svg {
 }
 
 .message-wrapper {
-  display: flex; 
+  display: flex;
   flex-direction: column;
 }
 
-.edit-message{
+.edit-message {
   display: flex;
+  position: absolute;
+  top: 0.5em;
   justify-content: center;
   align-items: center;
-  transform: translate(-150%, 0%); 
-  width: 25px;
-  height: 25px;
-  position:absolute; 
-  background-color: var(--message-in); 
+  transform: translate(-150%, 0%);
+  width: 20px;
+  height: 20px;
+  background-color: var(--message-in);
   border-radius: 100%;
-  padding: 0;
+  margin-top: 0px;
 }
-.edit-message:hover{
-  background-color: var(--light-button-hover); 
+.edit-message:hover {
+  background-color: var(--light-button-hover);
 }
 
 .time {
@@ -395,11 +403,19 @@ input::placeholder {
 /* ============ UTILITIES ============ */
 
 .color {
-  background: radial-gradient(circle, var(--background-glow), var(--background-color) 100%);
+  background: radial-gradient(
+    circle,
+    var(--background-glow),
+    var(--background-color) 100%
+  );
 }
 
 .padding {
   padding: 10px;
+}
+
+.padding-horizontal {
+  padding: 0px 10px;
 }
 
 .impact-text {
@@ -408,11 +424,15 @@ input::placeholder {
 }
 
 .system-text {
-  color: var(--text-bright); font-size: small; text-align: center;
-} 
+  color: var(--text-bright);
+  font-size: small;
+  text-align: center;
+}
 
 .system-text-minor {
-  color: var(--text-dim); font-size: smaller; text-align: center;
+  color: var(--text-dim);
+  font-size: smaller;
+  text-align: center;
 }
 
 /* ============ ANIMATIONS ============ */

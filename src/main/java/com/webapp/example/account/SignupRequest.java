@@ -15,5 +15,5 @@ public record SignupRequest(
     String email, 
 
     @NotNull
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
     String password) {}

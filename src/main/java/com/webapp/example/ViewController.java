@@ -114,8 +114,7 @@ public class ViewController {
   }
 
   @PostMapping("/perform-login")
-  public String login(@ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
-    
+  public String login(@Valid @ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
     String token = accountService.verify(loginRequest);
 
     if (token != null) {
@@ -131,7 +130,6 @@ public class ViewController {
 
   @PostMapping("/perform-signup")
   public String signup(@Valid @ModelAttribute SignupRequest signupRequest, BindingResult errors, HttpServletResponse response) {
-
     if (errors.hasErrors()){
       return "signup";
     }
