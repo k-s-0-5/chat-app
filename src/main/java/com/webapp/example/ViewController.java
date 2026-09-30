@@ -66,7 +66,8 @@ public class ViewController {
   @GetMapping("/conversation/{conversationId}/messages")
   public String getConversationMessages(
       @PathVariable UUID conversationId,
-      @RequestParam LocalDateTime before,
+      @RequestParam(required = false) LocalDateTime before,
+      @RequestParam(required = false) Long beforeid,
       Model model,
       @AuthenticationPrincipal UserPrincipal principal,
       jakarta.servlet.http.HttpServletRequest request) {
@@ -74,19 +75,19 @@ public class ViewController {
     if (!conversationService.isAccountInConversation(principal.getId(), conversationId)) {
       return "redirect:/home";
     }
+    List<Message> messages = new ArrayList<>();
+    messages = messageService.findByConversationId(conversationId, before, beforeid).reversed();
 
-    List<Message> messages = messageService.findByConversationId(conversationId, before).reversed();
     model.addAttribute("messages", messages);
-    model.addAttribute("currentUserId", principal.getId());
+    model.addAttribute("userId", principal.getId());
 
     String requestedWith = request.getHeader("X-Requested-With");
     if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
       return "homepage :: messageList";
+    } else {
+      model.addAttribute("conversations", conversationService.getMyConversations(principal.getId()));
+      return "homepage";
     }
-
-    model.addAttribute(
-        "conversations", conversationService.getMyConversations(principal.getId()));
-    return "homepage";
   }
 
   @PostMapping("/conversation")
@@ -96,7 +97,7 @@ public class ViewController {
       @AuthenticationPrincipal UserPrincipal principal) {
 
     List<Account> accounts = new ArrayList<Account>();
-    Account requester = accountService.findByUsername(principal.getUsername());
+    Account requester = accountService.findById(principal.getId());
     accounts.add(requester);
     for (int i = 0; i < accountIds.size(); i++) {
       try {
@@ -106,7 +107,7 @@ public class ViewController {
       }
       accounts.add(accountService.findById(accountIds.get(i)));
     }
-    conversationService.createConversation(accounts);
+    conversationService.create(accounts);
     model.addAttribute(
         "conversations", conversationService.getMyConversations(principal.getId()));
     return "homepage :: conversationList";
@@ -117,7 +118,7 @@ public class ViewController {
     
     String token = accountService.verify(loginRequest);
 
-    if (token != null && !token.isEmpty()) {
+    if (token != null) {
       Cookie jwtCookie = new Cookie("jwt_token", token);
       jwtCookie.setHttpOnly(true);
       jwtCookie.setPath("/");
@@ -138,7 +139,7 @@ public class ViewController {
     accountService.register(signupRequest);
     String token = accountService.verify(new LoginRequest(signupRequest.username(), signupRequest.password()));
 
-    if (token != null && !token.isEmpty()) {
+    if (token != null) {
       Cookie jwtCookie = new Cookie("jwt_token", token);
       jwtCookie.setHttpOnly(true);
       jwtCookie.setPath("/");

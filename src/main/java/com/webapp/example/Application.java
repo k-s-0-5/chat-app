@@ -44,8 +44,8 @@ public class Application {
           new Account(acc3, "user3", "user3@example.com", "3", "ROLE_USER"));
       conversationRepository.create(
           new Conversation(con1, "user1 & user2", LocalDateTime.parse("2026-04-25T10:01:00")));
-      participationRepository.create(new Participant(1, acc1, con1, LocalDateTime.now(), "ADMIN"));
-      participationRepository.create(new Participant(2, acc2, con1, LocalDateTime.now(), "USER"));
+      participationRepository.create(new Participant(acc1, con1, LocalDateTime.now(), "ADMIN"));
+      participationRepository.create(new Participant(acc2, con1, LocalDateTime.now(), "USER"));
 
       String[] texts = {
         "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 

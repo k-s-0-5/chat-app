@@ -4,4 +4,4 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /** Participant model */
-public record Participant(Integer id, UUID accountId, UUID conversationId, LocalDateTime lastRead, String role) {}
+public record Participant(UUID accountId, UUID conversationId, LocalDateTime lastRead, String role) {}

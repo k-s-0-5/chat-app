@@ -2,7 +2,6 @@ package com.webapp.example.account;
 
 import com.webapp.example.Errors.AccountNotFoundException;
 import com.webapp.example.auth.JWTService;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,19 +26,48 @@ public class AccountService {
     this.jwtService = jwtService;
   }
 
-  public Account findByUsername(String username) {
-    return accountRepository.findByUsername(username).orElseThrow(() -> new AccountNotFoundException(username));
-  }
-
-  public UUID findIdByUsername(String username) {
-    return accountRepository.findIdByUsername(username).orElseThrow(() -> new AccountNotFoundException(username));
-  }
-
+  /**
+   * Finds account where account.id == id else throws AccountNotFoundException
+   *
+   * @param id
+   * @return Account
+   */
   public Account findById(UUID id) {
     return accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
   }
 
-  public void register(SignupRequest signupRequest) {
+
+  /**
+   * Finds account where account.username == username else throws AccountNotFoundException
+   *
+   * @param username
+   * @return Account
+   */
+  public Account findByUsername(String username) {
+    return accountRepository
+        .findByUsername(username)
+        .orElseThrow(() -> new AccountNotFoundException(username));
+  }
+
+  /**
+   * Finds id of account where account.username == username else throws AccountNotFoundException
+   *
+   * @param username
+   * @return UUID
+   */
+  public UUID findIdByUsername(String username) {
+    return accountRepository
+        .findIdByUsername(username)
+        .orElseThrow(() -> new AccountNotFoundException(username));
+  }
+
+  /**
+   * Creates accounts
+   *
+   * @param signupRequest
+   * @return Number of rows affected
+   */
+  public int register(SignupRequest signupRequest) {
     Account account =
         new Account(
             UUID.randomUUID(),
@@ -47,17 +75,24 @@ public class AccountService {
             signupRequest.email(),
             encoder.encode(signupRequest.password()),
             "ROLE_USER");
-    accountRepository.create(account);
+    return accountRepository.create(account);
   }
 
+  /**
+   * Returns a JWT token if valid loginRequest else null
+   *
+   * @param loginRequest
+   * @return String
+   */
   public String verify(LoginRequest loginRequest) {
     Authentication authentication =
         authManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
+            new UsernamePasswordAuthenticationToken(
+                loginRequest.username(), loginRequest.password()));
     if (authentication.isAuthenticated()) {
       return jwtService.generateToken(loginRequest.username());
     } else {
-      return "";
+      return null;
     }
   }
 
@@ -70,12 +105,5 @@ public class AccountService {
             encoder.encode(account.password()),
             account.role());
     accountRepository.create(account);
-  }
-
-  /*
-      Method to bulk save accounts for testing purposes
-  **/
-  public void saveAll(List<Account> accounts) {
-    accounts.forEach(this::testRegister);
   }
 }

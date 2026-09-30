@@ -33,6 +33,16 @@ public class ApiExceptionHandler {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
   }
 
+  @ExceptionHandler(ConversationNotFoundException.class)
+  public ResponseEntity<ProblemDetail> conversationNotFound(
+      ConversationNotFoundException ex, HttpServletRequest request) {
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    problemDetail.setTitle("Conversation not found");
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
+  }
+
   @MessageExceptionHandler(MethodArgumentNotValidException.class)
   public void argumentInvalid(MethodArgumentNotValidException ex) {
     // TO-DO return info to user
@@ -42,10 +52,4 @@ public class ApiExceptionHandler {
   public void cryptoError(CryptoException ex) {
     // TO-DO return crypto information
   }
-
-  // @ExceptionHandler(Exception.class)
-  // public ProblemDetail genericError(Exception ex, HttpServletRequest request) {
-  //     return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An internal
-  // error occurred.");
-  // }
 }

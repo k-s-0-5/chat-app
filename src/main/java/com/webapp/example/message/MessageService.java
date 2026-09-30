@@ -2,12 +2,14 @@ package com.webapp.example.message;
 
 import com.webapp.example.Errors.MessageNotFoundException;
 import com.webapp.example.account.AccountService;
+import com.webapp.example.conversation.Conversation;
 import com.webapp.example.conversation.ConversationService;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,31 +28,76 @@ public class MessageService {
     this.conversationService = conversationService;
   }
 
-  public List<Message> findByConversationId(UUID conversationId, LocalDateTime timestamp) {
-    return messageRepository.findByConversationId(conversationId, timestamp);
-  }
-
+  /**
+   * Retrieves message where message.id == id else throws MessageNotFoundException
+   *
+   * @param id
+   * @return Optional of message
+   */
   public Message findById(long id) {
     return messageRepository.findById(id).orElseThrow(() -> new MessageNotFoundException(id));
   }
 
-  public Message createMessage(MessageCreateRequest messageCreateRequest, String username) {
+  /**
+   * Retrieves messages within a conversation sent before timestamp capped at 20 (excludes message with id)
+   *
+   * @param conversationId
+   * @param timestamp
+   * @param id
+   * @return List of messages with a conversationId == conversationId
+   */
+  public List<Message> findByConversationId(UUID conversationId, LocalDateTime timestamp, Long id) {
+    if (id != null) {
+      return messageRepository.findByConversationId(conversationId, timestamp, id);
+    } else {
+      return messageRepository.findByConversationId(conversationId, LocalDateTime.now());
+    }
+  }
+
+  /**
+   * Adds a new message to the database
+   *
+   * @param messageCreateRequest
+   * @param username
+   * @return Created message
+   */
+  public Message create(MessageCreateRequest messageCreateRequest, String username) {
     UUID accountId = accountService.findIdByUsername(username);
-    if (!conversationService.isAccountInConversation(accountId, messageCreateRequest.conversationId())) return null;
+    if (!conversationService.isAccountInConversation(accountId, messageCreateRequest.conversationId())) {
+      throw new AccessDeniedException("Not a participant in this conversation");
+    }
     return messageRepository.create(messageCreateRequest, accountId);
   }
 
-  public Message updateMessage(MessageUpdateRequest messageUpdateRequest, String username) {
+  /**
+   * Updates message's contents with messageUpdateRequest's where message.id == messageUpdateRequest.id
+   *
+   * @param messageUpdateRequest
+   * @param username
+   * @return Updated message
+   */
+  public Message update(MessageUpdateRequest messageUpdateRequest, String username) {
     UUID accountId = accountService.findIdByUsername(username);
     Message original = findById(messageUpdateRequest.id());
-    if (!accountId.equals(original.accountId())) return null;
+    if (!accountId.equals(original.accountId())) {
+      throw new AccessDeniedException("Not authorized to modify this message");
+    }
     return messageRepository.update(original, messageUpdateRequest.contents());
   }
 
-  public UUID deleteMessage(Long id, String username) {
+  /**
+   * Deletes message where message.id = id
+   *
+   * @param id
+   * @param username
+   * @return ConversationId for broadcasting
+   */
+  public UUID delete(Long id, String username) {
     UUID accountId = accountService.findIdByUsername(username);
     Message message = findById(id);
-    if (!accountId.equals(message.accountId())) return null;
+    if (!accountId.equals(message.accountId())) {
+      throw new AccessDeniedException("Not authorized to modify this message");
+    }
     messageRepository.delete(id, accountId);
     return message.conversationId();
   }

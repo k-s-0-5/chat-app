@@ -1,9 +1,7 @@
 package com.webapp.example.participant;
 
-import com.webapp.example.account.Account;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -20,53 +18,51 @@ public class ParticipantRepository {
     this.jdbcClient = jdbcClient;
   }
 
- /**
-   * Returns true if the account is in the conversation
-   *
+  /**
    * @param accountid
    * @param conversationId
-   * @return boolean
+   * @return true if the account is in the conversation
    */
   public boolean isAccountInConversation(UUID accountid, UUID conversationId) {
     return jdbcClient
-    .sql("""
-        SELECT EXISTS (
-            SELECT *
-            FROM Participant 
-            WHERE account_id = :accountId
-            AND conversation_id = :conversationId 
-        )
-        """)
-    .param("accountId", accountid)
-    .param("conversationId", conversationId)
-    .query(Boolean.class) 
-    .single();
+        .sql(
+            """
+            SELECT EXISTS (
+                SELECT *
+                FROM Participant
+                WHERE account_id = :accountId
+                AND conversation_id = :conversationId
+            )
+            """)
+        .param("accountId", accountid)
+        .param("conversationId", conversationId)
+        .query(Boolean.class)
+        .single();
   }
 
- /**
-   * Returns true if a common conversation exists between all users
-   *
+  /**
    * @param accountIds
-   * @return boolean
+   * @return true if a common conversation exists between all users
    */
   public boolean commonConversationExists(List<UUID> accountIds) {
     if (accountIds.isEmpty()) {
-        return false; 
+      return false;
     }
     return jdbcClient
-    .sql("""
-        SELECT EXISTS (
-            SELECT COUNT(*)
-            FROM Participant 
-            WHERE account_id IN (:accountIds)
-            GROUP BY conversation_id 
-            HAVING COUNT(DISTINCT account_id) = :accountCount
-        )
-        """)
-    .param("accountIds", accountIds)
-    .param("accountCount", accountIds.size())
-    .query(Boolean.class) 
-    .single();
+        .sql(
+            """
+            SELECT EXISTS (
+                SELECT COUNT(*)
+                FROM Participant
+                WHERE account_id IN (:accountIds)
+                GROUP BY conversation_id
+                HAVING COUNT(DISTINCT account_id) = :accountCount
+            )
+            """)
+        .param("accountIds", accountIds)
+        .param("accountCount", accountIds.size())
+        .query(Boolean.class)
+        .single();
   }
 
   /**
@@ -89,9 +85,10 @@ public class ParticipantRepository {
    * Adds a new participant to the database
    *
    * @param participant
+   * @return Number of rows affected
    */
-  public void create(Participant participant) {
-    jdbcClient
+  public int create(Participant participant) {
+    return jdbcClient
         .sql(
             """
             INSERT INTO Participant(
@@ -99,7 +96,7 @@ public class ParticipantRepository {
             values(?,?,?,?)
             """)
         .params(
-            participant.accountId(), participant.conversationId(), 
+            participant.accountId(), participant.conversationId(),
             participant.lastRead(), participant.role())
         .update();
   }
@@ -107,22 +104,21 @@ public class ParticipantRepository {
   /**
    * Replaces participant where participant.id = id with updatedParticipant
    *
-   * @param participant
+   * @param updatedParticipant
    * @param id
+   * @return Number of rows affected
    */
-  public void update(Participant updatedParticipant, Integer id) {
-    jdbcClient
+  public int update(Participant updatedParticipant, Integer id) {
+    return jdbcClient
         .sql(
             """
-            UPDATE Conversation SET accountId = ?,
-            conversationId = ?, last_read = ?, role = ? where id = ?
+            UPDATE Participant SET last_read = ?, role = ? WHERE account_id = ? AND conversation_id = ?
             """)
         .params(
-            updatedParticipant.accountId(),
-            updatedParticipant.conversationId(),
             updatedParticipant.lastRead(),
             updatedParticipant.role(),
-            id)
+            updatedParticipant.accountId(),
+            updatedParticipant.conversationId())
         .update();
   }
 
@@ -130,38 +126,15 @@ public class ParticipantRepository {
    * Deletes participant where participant.id = id
    *
    * @param id
+   * @return Number of rows affected
    */
-  public void delete(Participant participant) {
-    jdbcClient
-        .sql(
-            """
-            DELETE FROM Participant WHERE participant_id = :participant_id
-            """)
-        .param("participant_id", participant.id())
-        .update();
-  }
-
-  /**
-   * Retrieves number of rows in the Participant table
-   *
-   * @return number of rows in the Participant table
-   */
-  public int count() {
+  public int delete(UUID accountId, UUID conversationId) {
     return jdbcClient
         .sql(
             """
-            SELECT COUNT(*) FROM Participant
+            DELETE FROM Participant WHERE account_id = ? AND conversation_id = ?
             """)
-        .query(Integer.class)
-        .single();
-  }
-
-  /**
-   * Testing method, persists a list of Participants to the Participant table
-   *
-   * @param participants
-   */
-  public void saveAll(List<Participant> participants) {
-    participants.forEach(this::create);
+        .params(accountId, conversationId)
+        .update();
   }
 }

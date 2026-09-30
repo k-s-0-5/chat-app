@@ -1,5 +1,6 @@
 package com.webapp.example.conversation;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,9 +56,10 @@ public class ConversationRepository {
    * Adds a new conversation to the database
    *
    * @param conversation
+   * @return Number of rows affected
    */
-  public void create(Conversation conversation) {
-    jdbcClient
+  public int create(Conversation conversation) {
+    return jdbcClient
         .sql(
             """
             INSERT INTO Conversation(
@@ -69,58 +71,18 @@ public class ConversationRepository {
   }
 
   /**
-   * Replaces conversation where conversation.id = id with updatedConversation
-   *
-   * @param conversation
-   * @param id
-   */
-  public void update(Conversation updatedConversation, UUID id) {
-    jdbcClient
-        .sql(
-            """
-            UPDATE Conversation SET title = ?,
-            last_sent = ? where id = ?
-            """)
-        .params(updatedConversation.title(), updatedConversation.lastSent(), id)
-        .update();
-  }
-
-  /**
    * Deletes conversation where conversation.id = id
    *
    * @param id
+   * @return Number of rows affected
    */
-  public void delete(UUID id) {
-    jdbcClient
+  public int delete(UUID id) {
+    return jdbcClient
         .sql(
             """
             DELETE FROM Conversation WHERE id = :id
             """)
         .param("id", id)
         .update();
-  }
-
-  /**
-   * Retrieves number of rows in the Conversation table
-   *
-   * @return number of rows in the Conversation table
-   */
-  public int count() {
-    return jdbcClient
-        .sql(
-            """
-            SELECT COUNT(*) FROM Conversation
-            """)
-        .query(Integer.class)
-        .single();
-  }
-
-  /**
-   * Testing method, persists a list of conversations to the Conversation table
-   *
-   * @param conversations
-   */
-  public void saveAll(List<Conversation> conversations) {
-    conversations.forEach(this::create);
   }
 }

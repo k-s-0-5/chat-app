@@ -89,7 +89,8 @@ public class AccountRepository {
    * Retrieves account where account.username is like usernameSegment (excludes requester's id)
    *
    * @param usernameSegment
-   * @return List of accounts
+   * @param id
+   * @return List of AccountSearchResults
    */
   public List<AccountSearchResult> findByUsernameSegment(String usernameSegment, UUID id) {
     return jdbcClient
@@ -106,6 +107,7 @@ public class AccountRepository {
    * Adds a new account to the database
    *
    * @param account
+   * @return Number of rows affected
    */
   public int create(Account account) {
     return jdbcClient
@@ -116,12 +118,7 @@ public class AccountRepository {
             values(?,?,?,?,?)
             """)
         .params(
-            List.of(
-                account.id(),
-                account.username(),
-                account.email(),
-                account.password(),
-                account.role()))
+            account.id(), account.username(), account.email(), account.password(), account.role())
         .update();
   }
 
@@ -130,6 +127,7 @@ public class AccountRepository {
    *
    * @param updatedAccount
    * @param id
+   * @return Number of rows affected
    */
   public int update(Account updatedAccount, UUID id) {
     return jdbcClient
@@ -152,6 +150,7 @@ public class AccountRepository {
    * Deletes account where account.id == id
    *
    * @param id
+   * @return Number of rows affected
    */
   public int delete(UUID id) {
     return jdbcClient
@@ -161,29 +160,5 @@ public class AccountRepository {
             """)
         .param("id", id)
         .update();
-  }
-
-  /**
-   * Retrieves number of rows in the Account table
-   *
-   * @return number of rows in the Account table
-   */
-  public int count() {
-    return jdbcClient
-        .sql(
-            """
-            SELECT COUNT(*) FROM Account
-            """)
-        .query(Integer.class)
-        .single();
-  }
-
-  /**
-   * Testing method, persists a list of accounts to the Account table
-   *
-   * @param accounts
-   */
-  public void saveAll(List<Account> accounts) {
-    accounts.forEach(this::create);
   }
 }
