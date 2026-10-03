@@ -78,6 +78,10 @@ button {
   padding: 7px;
   border-radius: 10px;
 }
+button:hover {
+  background-color: var(--button-hover);
+}
+
 
 svg {
   flex-shrink: 0;
@@ -218,15 +222,13 @@ svg {
   width: inherit;
   height: fit-content;
   text-overflow: ellipsis;
+  text-align: start;
   overflow: hidden;
   color: #ffffff;
   padding: 7px;
   border-radius: 0px;
   border-top: solid 1px var(--border-color);
   background-color: var(--button-color);
-}
-.result:hover {
-  background-color: var(--button-hover);
 }
 .result--final {
   border-radius: 0px 0px 7px 7px;

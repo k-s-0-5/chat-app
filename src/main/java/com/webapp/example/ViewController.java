@@ -1,7 +1,5 @@
 package com.webapp.example;
 
-import com.webapp.example.Errors.AccountNotFoundException;
-import com.webapp.example.account.Account;
 import com.webapp.example.account.AccountService;
 import com.webapp.example.account.LoginRequest;
 import com.webapp.example.account.SignupRequest;
@@ -12,7 +10,6 @@ import com.webapp.example.message.MessageService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +55,7 @@ public class ViewController {
 
   @GetMapping("/home")
   public String home(Model model, @AuthenticationPrincipal UserPrincipal principal) {
-    model.addAttribute(
-        "conversations", conversationService.getMyConversations(principal.getId()));
+    model.addAttribute("conversations", conversationService.getMyConversations(principal.getId()));
     return "homepage";
   }
 
@@ -85,7 +81,8 @@ public class ViewController {
     if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
       return "homepage :: messageList";
     } else {
-      model.addAttribute("conversations", conversationService.getMyConversations(principal.getId()));
+      model.addAttribute(
+          "conversations", conversationService.getMyConversations(principal.getId()));
       return "homepage";
     }
   }
@@ -96,25 +93,20 @@ public class ViewController {
       Model model,
       @AuthenticationPrincipal UserPrincipal principal) {
 
-    List<Account> accounts = new ArrayList<Account>();
-    Account requester = accountService.findById(principal.getId());
-    accounts.add(requester);
     for (int i = 0; i < accountIds.size(); i++) {
-      try {
-        if (accountService.findById(accountIds.get(i)).id() == requester.id()) return "homepage :: conversationList";
-      } catch (AccountNotFoundException e) {
-        return "homepage :: conversationList";
+      if (accountIds.get(i).equals(principal.getId())) {
+        throw new IllegalArgumentException("Can not create a conversation with yourself");
       }
-      accounts.add(accountService.findById(accountIds.get(i)));
     }
-    conversationService.create(accounts);
-    model.addAttribute(
-        "conversations", conversationService.getMyConversations(principal.getId()));
+    accountIds.add(principal.getId());
+    conversationService.create(accountIds);
+    model.addAttribute("conversations", conversationService.getMyConversations(principal.getId()));
     return "homepage :: conversationList";
   }
 
   @PostMapping("/perform-login")
-  public String login(@Valid @ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
+  public String login(
+      @Valid @ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
     String token = accountService.verify(loginRequest);
 
     if (token != null) {
@@ -129,13 +121,17 @@ public class ViewController {
   }
 
   @PostMapping("/perform-signup")
-  public String signup(@Valid @ModelAttribute SignupRequest signupRequest, BindingResult errors, HttpServletResponse response) {
-    if (errors.hasErrors()){
+  public String signup(
+      @Valid @ModelAttribute SignupRequest signupRequest,
+      BindingResult errors,
+      HttpServletResponse response) {
+    if (errors.hasErrors()) {
       return "signup";
     }
 
     accountService.register(signupRequest);
-    String token = accountService.verify(new LoginRequest(signupRequest.username(), signupRequest.password()));
+    String token =
+        accountService.verify(new LoginRequest(signupRequest.username(), signupRequest.password()));
 
     if (token != null) {
       Cookie jwtCookie = new Cookie("jwt_token", token);

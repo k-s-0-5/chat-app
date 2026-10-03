@@ -40,14 +40,14 @@ public class AccountRepository {
    * @param id
    * @return Optional of account
    */
-  public Optional<Account> findById(UUID id) {
+  public Optional<AccountSearchResult> findById(UUID id) {
     return jdbcClient
         .sql(
             """
-            SELECT * FROM Account WHERE id = :id
+            SELECT id, username FROM Account WHERE id = :id
             """)
         .param("id", id)
-        .query(Account.class)
+        .query(AccountSearchResult.class)
         .optional();
   }
 

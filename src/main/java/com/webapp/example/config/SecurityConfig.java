@@ -14,7 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/** Just chooses which requests are permitted and what encoder is used */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {

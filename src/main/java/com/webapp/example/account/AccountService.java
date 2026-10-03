@@ -2,6 +2,11 @@ package com.webapp.example.account;
 
 import com.webapp.example.Errors.AccountNotFoundException;
 import com.webapp.example.auth.JWTService;
+import com.webapp.example.participant.Participant;
+import com.webapp.example.participant.ParticipantRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,15 +18,18 @@ import org.springframework.stereotype.Service;
 public class AccountService {
 
   private final AccountRepository accountRepository;
+  private final ParticipantRepository participantRepository;
   private final AuthenticationManager authManager;
   private final JWTService jwtService;
   private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
 
   AccountService(
       AccountRepository accountRepository,
+      ParticipantRepository participantRepository,
       AuthenticationManager authManager,
       JWTService jwtService) {
     this.accountRepository = accountRepository;
+    this.participantRepository = participantRepository;
     this.authManager = authManager;
     this.jwtService = jwtService;
   }
@@ -30,12 +38,11 @@ public class AccountService {
    * Finds account where account.id == id else throws AccountNotFoundException
    *
    * @param id
-   * @return Account
+   * @return AccountSearchResult
    */
-  public Account findById(UUID id) {
+  public AccountSearchResult findById(UUID id) {
     return accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
   }
-
 
   /**
    * Finds account where account.username == username else throws AccountNotFoundException
@@ -47,6 +54,21 @@ public class AccountService {
     return accountRepository
         .findByUsername(username)
         .orElseThrow(() -> new AccountNotFoundException(username));
+  }
+
+  /**
+   * Retrieves a list of conversations where participant.accountId == accountId
+   *
+   * @param conversationId
+   * @return List of AccountSearchResult
+   */
+  public List<AccountSearchResult> getAccountsInConversations(UUID conversationId) {
+    List<Participant> participants = participantRepository.findAllInConversation(conversationId);
+    List<AccountSearchResult> accounts = new ArrayList<AccountSearchResult>();
+    for (Participant p : participants) {
+      accounts.add(findById(p.accountId()));
+    }
+    return accounts;
   }
 
   /**

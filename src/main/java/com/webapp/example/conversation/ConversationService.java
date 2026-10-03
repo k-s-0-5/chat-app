@@ -1,7 +1,7 @@
 package com.webapp.example.conversation;
 
 import com.webapp.example.Errors.ConversationNotFoundException;
-import com.webapp.example.account.Account;
+import com.webapp.example.account.AccountService;
 import com.webapp.example.participant.Participant;
 import com.webapp.example.participant.ParticipantRepository;
 import java.time.LocalDateTime;
@@ -12,13 +12,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ConversationService {
+  private final AccountService accountService;
   private final ConversationRepository conversationRepository;
   private final ParticipantRepository participantRepository;
 
   ConversationService(
-      ConversationRepository conversationRepository, ParticipantRepository participantRepository) {
+      ConversationRepository conversationRepository,
+      ParticipantRepository participantRepository,
+      AccountService accountService) {
     this.conversationRepository = conversationRepository;
     this.participantRepository = participantRepository;
+    this.accountService = accountService;
   }
 
   /**
@@ -28,7 +32,9 @@ public class ConversationService {
    * @return Conversation
    */
   public Conversation findById(UUID id) {
-    return conversationRepository.findById(id).orElseThrow(() -> new ConversationNotFoundException(id));
+    return conversationRepository
+        .findById(id)
+        .orElseThrow(() -> new ConversationNotFoundException(id));
   }
 
   /**
@@ -50,7 +56,7 @@ public class ConversationService {
     List<Participant> participants = participantRepository.findAllWithAccount(accountId);
     List<Conversation> conversations = new ArrayList<Conversation>();
     for (Participant p : participants) {
-      conversations.add(conversationRepository.findById(p.conversationId()).get());
+      conversations.add(findById(p.conversationId()));
     }
     sortByTime(conversations);
     return conversations;
@@ -59,41 +65,35 @@ public class ConversationService {
   /**
    * Creates conversation, returns early if conversation with all accounts already exists
    *
-   * @param accounts
+   * @param accountIds
    * @return Number of rows affected
    */
-  public int create(List<Account> accounts) {
+  public int create(List<UUID> accountIds) {
     int rowsAffected = 0;
-    List<UUID> accountIds = new ArrayList<UUID>();
-    for (Account account : accounts) {
-      accountIds.add(account.id());
-    }
+
     if (participantRepository.commonConversationExists(accountIds)) {
       return rowsAffected;
     }
 
     String title = "";
-    for (int i = 0; i < accounts.size(); i++) {
-      title += accounts.get(i).username();
-      if (i < accounts.size() - 1) {
+    for (int i = 0; i < accountIds.size(); i++) {
+      title += accountService.findById(accountIds.get(i)).username();
+      if (i < accountIds.size() - 1) {
         title += " & ";
       }
     }
 
     UUID conversationId = UUID.randomUUID();
-    rowsAffected = conversationRepository.create(new Conversation(conversationId, title, LocalDateTime.now()));
+    rowsAffected =
+        conversationRepository.create(new Conversation(conversationId, title, LocalDateTime.now()));
 
-    if (rowsAffected == 0){
+    if (rowsAffected == 0) {
       return rowsAffected;
     }
 
-    for (int i = 0; i < accounts.size(); i++) {
+    for (int i = 0; i < accountIds.size(); i++) {
       participantRepository.create(
-          new Participant(
-              accounts.get(i).id(),
-              conversationId,
-              LocalDateTime.now(),
-              "ROLE_USER"));
+          new Participant(accountIds.get(i), conversationId, LocalDateTime.now(), "ROLE_USER"));
     }
 
     return rowsAffected;
@@ -117,8 +117,8 @@ public class ConversationService {
       merge(list, left, right);
     }
   }
-  private void merge(
-      List<Conversation> list, List<Conversation> left, List<Conversation> right) {
+
+  private void merge(List<Conversation> list, List<Conversation> left, List<Conversation> right) {
     int i = 0, j = 0, k = 0;
 
     while (i < left.size() && j < right.size()) {

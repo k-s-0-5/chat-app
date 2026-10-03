@@ -66,8 +66,9 @@ public class ParticipantRepository {
   }
 
   /**
-   * Retrieves all participants
+   * Retrieves all participants where participant.accountId = accountId
    *
+   * @param accountId
    * @return List of all participants
    */
   public List<Participant> findAllWithAccount(UUID accountId) {
@@ -77,6 +78,23 @@ public class ParticipantRepository {
             SELECT * FROM Participant WHERE account_id = :accountId
             """)
         .param("accountId", accountId)
+        .query(Participant.class)
+        .list();
+  }
+
+  /**
+   * Retrieves all participants where participant.conversationId = conversationId
+   *
+   * @param conversationId
+   * @return List of all participants
+   */
+  public List<Participant> findAllInConversation(UUID conversationId) {
+    return jdbcClient
+        .sql(
+            """
+            SELECT * FROM Participant WHERE conversation_id = :conversationId
+            """)
+        .param("conversationId", conversationId)
         .query(Participant.class)
         .list();
   }

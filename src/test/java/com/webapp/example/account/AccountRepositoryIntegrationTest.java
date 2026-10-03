@@ -33,9 +33,9 @@ public class AccountRepositoryIntegrationTest {
             UUID id = UUID.randomUUID();
             Account a = new Account(id, "user1", "user1@example.com", "1", "ROLE_USER");
             accountRepository.create(a);
-            Optional<Account> oa = accountRepository.findById(id);
+            Optional<AccountSearchResult> oa = accountRepository.findById(id);
             assertTrue(oa.isPresent());
-            assertEquals(oa.get(), a);
+            assertEquals(oa.get().username(), a.username());
         }
 
         @Test

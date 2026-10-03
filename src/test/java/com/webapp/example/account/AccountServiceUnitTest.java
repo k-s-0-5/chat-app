@@ -46,9 +46,9 @@ public class AccountServiceUnitTest {
         @Test
         void testFindById() {
             UUID id = UUID.randomUUID();
-            Account account = new Account(id, "Test", "test@mail.com", encoder.encode("TestPassword"), "ROLE_USER");
+            AccountSearchResult account = new AccountSearchResult(id, "Test");
             when(accountRepository.findById(id)).thenReturn(Optional.of(account));
-            Account result = accountService.findById(id);
+            AccountSearchResult result = accountService.findById(id);
             assertEquals(account, result);
         }
 
