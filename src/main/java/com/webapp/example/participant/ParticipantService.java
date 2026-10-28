@@ -24,12 +24,12 @@ public class ParticipantService {
   }
 
   /**
-   * @param accountid
+   * @param accountId
    * @param conversationId
    * @return True if the account is in the conversation
    */
-  public boolean isAccountInConversation(UUID accountid, UUID conversationId) {
-    return participantRepository.isAccountInConversation(accountid, conversationId);
+  public boolean isAccountInConversation(UUID accountId, UUID conversationId) {
+    return participantRepository.isAccountInConversation(accountId, conversationId);
   }
 
   /**

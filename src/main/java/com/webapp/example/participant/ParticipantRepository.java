@@ -19,11 +19,11 @@ public class ParticipantRepository {
   }
 
   /**
-   * @param accountid
+   * @param accountId
    * @param conversationId
    * @return true if the account is in the conversation
    */
-  public boolean isAccountInConversation(UUID accountid, UUID conversationId) {
+  public boolean isAccountInConversation(UUID accountId, UUID conversationId) {
     return jdbcClient
         .sql(
             """
@@ -34,7 +34,7 @@ public class ParticipantRepository {
                 AND conversation_id = :conversationId
             )
             """)
-        .param("accountId", accountid)
+        .param("accountId", accountId)
         .param("conversationId", conversationId)
         .query(Boolean.class)
         .single();
