@@ -56,7 +56,7 @@ public class ConversationService {
   /**
    * Creates conversation and participants
    *
-   * @param participants
+   * @param accountIds
    * @return Conversation
    */
   public Conversation create(String title, List<UUID> accountIds) {
