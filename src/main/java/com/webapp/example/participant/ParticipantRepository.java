@@ -69,7 +69,7 @@ public class ParticipantRepository {
    * Retrieves all participants where participant.accountId = accountId
    *
    * @param accountId
-   * @return List of all participants
+   * @return List of participants
    */
   public List<Participant> findAllWithAccount(UUID accountId) {
     return jdbcClient
@@ -86,7 +86,7 @@ public class ParticipantRepository {
    * Retrieves all participants where participant.conversationId = conversationId
    *
    * @param conversationId
-   * @return List of all participants
+   * @return List of participants
    */
   public List<Participant> findAllInConversation(UUID conversationId) {
     return jdbcClient
@@ -143,7 +143,8 @@ public class ParticipantRepository {
   /**
    * Deletes participant where participant.id = id
    *
-   * @param id
+   * @param accountId
+   * @param conversationId
    * @return Number of rows affected
    */
   public int delete(UUID accountId, UUID conversationId) {
@@ -153,6 +154,24 @@ public class ParticipantRepository {
             DELETE FROM Participant WHERE account_id = ? AND conversation_id = ?
             """)
         .params(accountId, conversationId)
+        .update();
+  }
+
+  /**
+   * Deletes participants where participant.id is in accountIds
+   *
+   * @param accountIds
+   * @param conversationId
+   * @return Number of rows affected
+   */
+  public int batchDelete(List<UUID> accountIds, UUID conversationId) {
+    return jdbcClient
+        .sql(
+            """
+            DELETE FROM Participant WHERE account_id IN (:accountIds) AND conversation_id = :conversationId
+            """)
+        .param("accountIds", accountIds)
+        .param("conversationId", conversationId)
         .update();
   }
 }

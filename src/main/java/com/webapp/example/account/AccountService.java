@@ -3,8 +3,6 @@ package com.webapp.example.account;
 import com.webapp.example.Errors.AccountNotFoundException;
 import com.webapp.example.auth.JWTService;
 import com.webapp.example.participant.Participant;
-import com.webapp.example.participant.ParticipantRepository;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -18,18 +16,15 @@ import org.springframework.stereotype.Service;
 public class AccountService {
 
   private final AccountRepository accountRepository;
-  private final ParticipantRepository participantRepository;
   private final AuthenticationManager authManager;
   private final JWTService jwtService;
   private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
 
   AccountService(
       AccountRepository accountRepository,
-      ParticipantRepository participantRepository,
       AuthenticationManager authManager,
       JWTService jwtService) {
     this.accountRepository = accountRepository;
-    this.participantRepository = participantRepository;
     this.authManager = authManager;
     this.jwtService = jwtService;
   }
@@ -57,13 +52,12 @@ public class AccountService {
   }
 
   /**
-   * Retrieves a list of conversations where participant.accountId == accountId
+   * Retrieves a list of accounts from a list of participants
    *
-   * @param conversationId
+   * @param participants
    * @return List of AccountSearchResult
    */
-  public List<AccountSearchResult> getAccountsInConversations(UUID conversationId) {
-    List<Participant> participants = participantRepository.findAllInConversation(conversationId);
+  public List<AccountSearchResult> getAccountsInConversations(List<Participant> participants) {
     List<AccountSearchResult> accounts = new ArrayList<AccountSearchResult>();
     for (Participant p : participants) {
       accounts.add(findById(p.accountId()));

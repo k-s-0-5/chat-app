@@ -58,16 +58,12 @@ public class MessageService {
    * Adds a new message to the database
    *
    * @param messageCreateRequest
-   * @param username
+   * @param accountId
    * @return Created message
    */
-  public Message create(MessageCreateRequest messageCreateRequest, String username) {
+  public Message create(MessageCreateRequest messageCreateRequest, UUID accountId) {
     if (messageCreateRequest.contents().getBytes(StandardCharsets.UTF_8).length > 1000) {
       throw new IllegalArgumentException("Message exceeds byte limit");
-    }
-    UUID accountId = accountService.findIdByUsername(username);
-    if (!conversationService.isAccountInConversation(accountId, messageCreateRequest.conversationId())) {
-      throw new AccessDeniedException("Not a participant in this conversation");
     }
     return messageRepository.create(messageCreateRequest, accountId);
   }

@@ -7,6 +7,7 @@ import com.webapp.example.auth.UserPrincipal;
 import com.webapp.example.conversation.ConversationService;
 import com.webapp.example.message.Message;
 import com.webapp.example.message.MessageService;
+import com.webapp.example.participant.ParticipantService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class ViewController {
 
+  private final ParticipantService participantService;
   private final ConversationService conversationService;
   private final AccountService accountService;
   private final MessageService messageService;
@@ -35,10 +37,12 @@ public class ViewController {
   ViewController(
       ConversationService conversationService,
       AccountService accountService,
-      MessageService messageService) {
+      MessageService messageService,
+      ParticipantService participantService) {
     this.conversationService = conversationService;
     this.accountService = accountService;
     this.messageService = messageService;
+    this.participantService = participantService;
   }
 
   @GetMapping("/login")
@@ -55,7 +59,10 @@ public class ViewController {
 
   @GetMapping("/home")
   public String home(Model model, @AuthenticationPrincipal UserPrincipal principal) {
-    model.addAttribute("conversations", conversationService.getMyConversations(principal.getId()));
+    model.addAttribute(
+        "conversations",
+        conversationService.getMyConversations(
+            participantService.findAllWithAccount(principal.getId())));
     return "homepage";
   }
 
@@ -68,7 +75,7 @@ public class ViewController {
       @AuthenticationPrincipal UserPrincipal principal,
       jakarta.servlet.http.HttpServletRequest request) {
 
-    if (!conversationService.isAccountInConversation(principal.getId(), conversationId)) {
+    if (!participantService.isAccountInConversation(principal.getId(), conversationId)) {
       return "redirect:/home";
     }
     List<Message> messages = new ArrayList<>();
@@ -82,7 +89,9 @@ public class ViewController {
       return "homepage :: messageList";
     } else {
       model.addAttribute(
-          "conversations", conversationService.getMyConversations(principal.getId()));
+          "conversations",
+          conversationService.getMyConversations(
+              participantService.findAllWithAccount(principal.getId())));
       return "homepage";
     }
   }
@@ -91,6 +100,7 @@ public class ViewController {
   public String makeConversation(
       @RequestBody List<UUID> accountIds,
       Model model,
+      HttpServletResponse response,
       @AuthenticationPrincipal UserPrincipal principal) {
 
     for (int i = 0; i < accountIds.size(); i++) {
@@ -99,8 +109,28 @@ public class ViewController {
       }
     }
     accountIds.add(principal.getId());
-    conversationService.create(accountIds);
-    model.addAttribute("conversations", conversationService.getMyConversations(principal.getId()));
+    if (participantService.commonConversationExists(accountIds)) {
+      model.addAttribute(
+          "conversations",
+          conversationService.getMyConversations(
+              participantService.findAllWithAccount(principal.getId())));
+      return "homepage :: conversationList";
+    }
+
+    String title = "";
+    for (int i = 0; i < accountIds.size(); i++) {
+      title += accountService.findById(accountIds.get(i)).username();
+      if (i < accountIds.size() - 1) {
+        title += " | ";
+      }
+    }
+
+    conversationService.create(title, accountIds);
+
+    model.addAttribute(
+        "conversations",
+        conversationService.getMyConversations(
+            participantService.findAllWithAccount(principal.getId())));
     return "homepage :: conversationList";
   }
 

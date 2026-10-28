@@ -1,11 +1,13 @@
 package com.webapp.example.conversation;
 
-import java.time.LocalDateTime;
+import com.webapp.example.participant.Participant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This class encapsulates data access with the Database's Conversation table and can retrieve,
@@ -15,9 +17,11 @@ import org.springframework.stereotype.Repository;
 public class ConversationRepository {
 
   private final JdbcClient jdbcClient;
+  private final JdbcTemplate jdbcTemplate;
 
-  public ConversationRepository(JdbcClient jdbcClient) {
+  public ConversationRepository(JdbcClient jdbcClient, JdbcTemplate jdbcTemplate) {
     this.jdbcClient = jdbcClient;
+    this.jdbcTemplate = jdbcTemplate;
   }
 
   /**
@@ -53,13 +57,15 @@ public class ConversationRepository {
   }
 
   /**
-   * Adds a new conversation to the database
+   * Creates conversation and participants
    *
    * @param conversation
-   * @return Number of rows affected
+   * @param participants
+   * @return Conversation
    */
-  public int create(Conversation conversation) {
-    return jdbcClient
+  @Transactional
+  public Conversation create(Conversation conversation, List<Participant> participants) {
+    jdbcClient
         .sql(
             """
             INSERT INTO Conversation(
@@ -68,6 +74,20 @@ public class ConversationRepository {
             """)
         .params(conversation.id(), conversation.title(), conversation.lastSent())
         .update();
+
+    jdbcTemplate.batchUpdate(
+        """
+        INSERT INTO Participant(account_id, conversation_id, last_read, role) values (?,?,?,?)
+        """,
+        participants,
+        participants.size(),
+        (ps, p) -> {
+          ps.setObject(1, p.accountId());
+          ps.setObject(2, p.conversationId());
+          ps.setObject(3, p.lastRead());
+          ps.setString(4, p.role());
+        });
+        return conversation;
   }
 
   /**

@@ -1,6 +1,7 @@
 package com.webapp.example.conversation;
 
 import com.webapp.example.Errors.ConversationNotFoundException;
+import com.webapp.example.account.AccountSearchResult;
 import com.webapp.example.account.AccountService;
 import com.webapp.example.participant.Participant;
 import com.webapp.example.participant.ParticipantRepository;
@@ -38,22 +39,12 @@ public class ConversationService {
   }
 
   /**
-   * @param accountid
-   * @param conversationId
-   * @return True if the account is in the conversation
-   */
-  public boolean isAccountInConversation(UUID accountid, UUID conversationId) {
-    return participantRepository.isAccountInConversation(accountid, conversationId);
-  }
-
-  /**
-   * Retrieves a list of conversations where participant.accountId == accountId
+   * Retrieves a list of conversations from list of participants
    *
-   * @param accountId
+   * @param participants
    * @return List of conversations
    */
-  public List<Conversation> getMyConversations(UUID accountId) {
-    List<Participant> participants = participantRepository.findAllWithAccount(accountId);
+  public List<Conversation> getMyConversations(List<Participant> participants) {
     List<Conversation> conversations = new ArrayList<Conversation>();
     for (Participant p : participants) {
       conversations.add(findById(p.conversationId()));
@@ -63,40 +54,18 @@ public class ConversationService {
   }
 
   /**
-   * Creates conversation, returns early if conversation with all accounts already exists
+   * Creates conversation and participants
    *
-   * @param accountIds
-   * @return Number of rows affected
+   * @param participants
+   * @return Conversation
    */
-  public int create(List<UUID> accountIds) {
-    int rowsAffected = 0;
-
-    if (participantRepository.commonConversationExists(accountIds)) {
-      return rowsAffected;
-    }
-
-    String title = "";
+  public Conversation create(String title, List<UUID> accountIds) {
+    UUID id = UUID.randomUUID();
+    List<Participant> participants = new ArrayList<>();
     for (int i = 0; i < accountIds.size(); i++) {
-      title += accountService.findById(accountIds.get(i)).username();
-      if (i < accountIds.size() - 1) {
-        title += " & ";
-      }
+      participants.add(new Participant(accountIds.get(i), id, LocalDateTime.now(), "ROLE_USER"));
     }
-
-    UUID conversationId = UUID.randomUUID();
-    rowsAffected =
-        conversationRepository.create(new Conversation(conversationId, title, LocalDateTime.now()));
-
-    if (rowsAffected == 0) {
-      return rowsAffected;
-    }
-
-    for (int i = 0; i < accountIds.size(); i++) {
-      participantRepository.create(
-          new Participant(accountIds.get(i), conversationId, LocalDateTime.now(), "ROLE_USER"));
-    }
-
-    return rowsAffected;
+    return conversationRepository.create(new Conversation(id, title, LocalDateTime.now()), participants);
   }
 
   /**

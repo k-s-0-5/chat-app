@@ -2,6 +2,7 @@ package com.webapp.example.config;
 
 import com.webapp.example.account.AccountService;
 import com.webapp.example.conversation.ConversationService;
+import com.webapp.example.participant.ParticipantService;
 import java.util.UUID;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -16,12 +17,17 @@ import org.springframework.security.access.AccessDeniedException;
 @Configuration
 public class MessageInterceptor implements ChannelInterceptor {
 
+  private final ParticipantService participantService;
   private final ConversationService conversationService;
   private final AccountService accountService;
 
-  MessageInterceptor(ConversationService conversationService, AccountService accountService) {
+  MessageInterceptor(
+      ConversationService conversationService,
+      AccountService accountService,
+      ParticipantService participantService) {
     this.conversationService = conversationService;
     this.accountService = accountService;
+    this.participantService = participantService;
   }
 
   @Override
@@ -45,7 +51,7 @@ public class MessageInterceptor implements ChannelInterceptor {
         } catch (IllegalArgumentException e) {
           throw new AccessDeniedException("Topic unavailable");
         }
-        if (!conversationService.isAccountInConversation(
+        if (!participantService.isAccountInConversation(
             accountService.findIdByUsername(accessor.getUser().getName()), uuid)) {
           throw new AccessDeniedException("Topic unavailable");
         }
