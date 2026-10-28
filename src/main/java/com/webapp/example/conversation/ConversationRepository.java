@@ -80,7 +80,7 @@ public class ConversationRepository {
         INSERT INTO Participant(account_id, conversation_id, last_read, role) values (?,?,?,?)
         """,
         participants,
-        participants.size(),
+        100,
         (ps, p) -> {
           ps.setObject(1, p.accountId());
           ps.setObject(2, p.conversationId());
